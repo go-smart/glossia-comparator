@@ -237,7 +237,10 @@ class GoSmartSimulationServerComponent(object):
     @asyncio.coroutine
     def doRequestDiagnostic(self, guid):
         if guid not in self.current:
+            logger.info("Simulation [%s] not found" % guid)
             return {}
+
+        logger.info("Diagnostic bundle requested for [%s]" % guid)
 
         current = self.current[guid]
 
@@ -249,6 +252,8 @@ class GoSmartSimulationServerComponent(object):
         except Exception:
             logger.exception("Problem pushing files")
             return {}
+
+        logger.info("Diagnostic bundle sent")
 
         return uploaded_files
 
