@@ -231,6 +231,27 @@ class GoSmartSimulationServerComponent(object):
         comparator = gssa.comparator.Comparator(this_xml, that_xml)
         return comparator.diff()
 
+    # com.gosmartsimulation.request_diagnostic - push a bundle of diagnostic
+    # files through the transferrer
+    # FIXME: this should be made asynchronous!
+    @asyncio.coroutine
+    def doRequestDiagnostic(self, guid):
+        if guid not in self.current:
+            return {}
+
+        current = self.current[guid]
+
+        diagnostic_archive = current.gather_diagnostic()
+
+        files = {diagnostic_archive: "%s.tgz" % guid}
+        try:
+            uploaded_files = current.push_files(files)
+        except Exception:
+            logger.exception("Problem pushing files")
+            return {}
+
+        return uploaded_files
+
     # com.gosmartsimulation.update_settings_xml - set the GSSA-XML for a given
     # simulation
     @asyncio.coroutine

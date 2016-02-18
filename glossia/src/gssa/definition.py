@@ -18,6 +18,7 @@
 import os
 import shutil
 import sys
+import tarfile
 import logging
 
 logger = logging.getLogger(__name__)
@@ -225,6 +226,39 @@ class GoSmartSimulationDefinition:
         shutil.rmtree(self._dir)
 
         return True
+
+    # Create a diagnostic archive
+    def create_diagnostic(self):
+        input_directory = os.path.join(self.get_dir(), 'input')
+        input_final_directory = os.path.join(self.get_dir(), 'input.final')
+        output_directory = os.path.join(self.get_dir(), 'output')
+        log_directory = os.path.join(output_directory, 'logs')
+
+        os.makedirs(output_directory, exist_ok=True)
+
+        diagnostic_archive = os.path.join(output_directory, 'diagnostic_archive.tgz')
+        missing_file = os.path.join(output_directory, 'diagnostic_missing.txt')
+
+        diagnostic_files = {
+            'input directory': input_directory,
+            'input.final directory': input_final_directory,
+            'log directory': log_directory
+        }
+
+        logger.debug("Creating tarfile")
+
+        with tarfile.open(diagnostic_archive, mode='w:gz') as definition_tar:
+            with open(missing_file, 'w') as missing:
+                for f, loc in diagnostic_files.items():
+                    try:
+                        definition_tar.add(input_directory, recursive=True)
+                    except Exception as e:
+                        missing.write("Missing %s : %s\n" % (f, str(e)))
+            definition_tar.add(missing_file)
+
+        logger.debug("Created tarfile")
+
+        return diagnostic_archive
 
     # Send back the results
     def push_files(self, files):
