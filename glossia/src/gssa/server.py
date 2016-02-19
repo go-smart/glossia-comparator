@@ -254,7 +254,7 @@ class GoSmartSimulationServerComponent(object):
 
         if target is None:
             gateway = gssa.utils.get_default_gateway()
-            target = "http://%s:%d/%s.tgz" (
+            target = "http://%s:%d/%s.tgz" % (
                 gateway,
                 _default_client_port,
                 guid

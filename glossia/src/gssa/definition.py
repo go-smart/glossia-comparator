@@ -240,9 +240,9 @@ class GoSmartSimulationDefinition:
         missing_file = os.path.join(output_directory, 'diagnostic_missing.txt')
 
         diagnostic_files = {
-            'input directory': input_directory,
-            'input.final directory': input_final_directory,
-            'log directory': log_directory
+            'input': input_directory,
+            'input.final': input_final_directory,
+            'logs': log_directory
         }
 
         logger.debug("Creating tarfile")
@@ -251,10 +251,10 @@ class GoSmartSimulationDefinition:
             with open(missing_file, 'w') as missing:
                 for f, loc in diagnostic_files.items():
                     try:
-                        definition_tar.add(input_directory, recursive=True)
+                        definition_tar.add(loc, arcname='%s/%s' % (self._guid, f))
                     except Exception as e:
                         missing.write("Missing %s : %s\n" % (f, str(e)))
-            definition_tar.add(missing_file)
+            definition_tar.add(missing_file, arcname='%s/diagnostic_missing.txt' % self._guid)
 
         logger.debug("Created tarfile")
 
