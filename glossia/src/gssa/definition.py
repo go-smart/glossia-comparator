@@ -228,7 +228,7 @@ class GoSmartSimulationDefinition:
         return True
 
     # Create a diagnostic archive
-    def create_diagnostic(self):
+    def gather_diagnostic(self):
         input_directory = os.path.join(self.get_dir(), 'input')
         input_final_directory = os.path.join(self.get_dir(), 'input.final')
         output_directory = os.path.join(self.get_dir(), 'output')

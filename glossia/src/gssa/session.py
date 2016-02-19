@@ -102,8 +102,8 @@ class GoSmartSimulationServerSession(ApplicationSession):
     # com.gosmartsimulation.request_diagnostic - push a bundle of diagnostic
     # files through the transferrer
     @asyncio.coroutine
-    def doRequestDiagnostic(self, guid):
-        return self._component.doRequestDiagnostic(guid)
+    def doRequestDiagnostic(self, guid, target):
+        return self._component.doRequestDiagnostic(guid, target)
 
     # com.gosmartsimulation.retrieve_status - get the latest status for a
     # simulation

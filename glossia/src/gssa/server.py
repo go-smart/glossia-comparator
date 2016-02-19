@@ -43,6 +43,11 @@ import gssa.definition
 import gssa.translator
 from gssa.error import Error, makeError
 from gssa.config import etc_location
+import gssa.utils
+
+
+# FIXME: 18103 should be made configurable
+_default_client_port = 18103
 
 
 # This subclasses ApplicationSession, which runs inside an Autobahn WAMP session
@@ -232,10 +237,11 @@ class GoSmartSimulationServerComponent(object):
         return comparator.diff()
 
     # com.gosmartsimulation.request_diagnostic - push a bundle of diagnostic
-    # files through the transferrer
+    # files through the transferrer. If target is None, assume gateway is
+    # running a temporary HTTP on default client port
     # FIXME: this should be made asynchronous!
     @asyncio.coroutine
-    def doRequestDiagnostic(self, guid):
+    def doRequestDiagnostic(self, guid, target):
         if guid not in self.current:
             logger.info("Simulation [%s] not found" % guid)
             return {}
@@ -246,7 +252,15 @@ class GoSmartSimulationServerComponent(object):
 
         diagnostic_archive = current.gather_diagnostic()
 
-        files = {diagnostic_archive: "%s.tgz" % guid}
+        if target is None:
+            gateway = gssa.utils.get_default_gateway()
+            target = "http://%s:%d/%s.tgz" (
+                gateway,
+                _default_client_port,
+                guid
+            )
+
+        files = {diagnostic_archive: target}
         try:
             uploaded_files = current.push_files(files)
         except Exception:
