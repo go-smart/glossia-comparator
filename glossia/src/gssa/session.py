@@ -99,6 +99,12 @@ class GoSmartSimulationServerSession(ApplicationSession):
     def doProperties(self, guid):
         return self._component.doProperties(guid)
 
+    # com.gosmartsimulation.request_diagnostic - push a bundle of diagnostic
+    # files through the transferrer
+    @asyncio.coroutine
+    def doRequestDiagnostic(self, guid, target):
+        return self._component.doRequestDiagnostic(guid, target)
+
     # com.gosmartsimulation.retrieve_status - get the latest status for a
     # simulation
     @asyncio.coroutine
@@ -133,6 +139,7 @@ class GoSmartSimulationServerSession(ApplicationSession):
                 self.register(self.doUpdateSettingsXml, u'com.gosmartsimulation%s.update_settings_xml' % i)
                 self.register(self.doUpdateFiles, u'com.gosmartsimulation%s.update_files' % i)
                 self.register(self.doRequestFiles, u'com.gosmartsimulation%s.request_files' % i)
+                self.register(self.doRequestDiagnostic, u'com.gosmartsimulation%s.request_diagnostic' % i)
                 self.register(self.doTmpValidation, u'com.gosmartsimulation%s.tmp_validation' % i)
                 self.register(self.doFinalize, u'com.gosmartsimulation%s.finalize' % i)
                 self.register(self.doClean, u'com.gosmartsimulation%s.clean' % i)
