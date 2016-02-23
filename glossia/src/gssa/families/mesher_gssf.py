@@ -303,7 +303,7 @@ class MesherGSSFMixin:
             for ix in self._needles:
                 int(ix.replace('needle', ''))
         except ValueError:
-            self._needles = {str(i): v for i, v in enumerate(self._needles.values())}
+            self._needles = {str(i + 1): v for i, v in enumerate(self._needles.values())}
 
         for ix, needle in self._needles.items():
             # Add a needle node and set the name to be our index (if we have
