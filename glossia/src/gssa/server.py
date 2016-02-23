@@ -382,9 +382,10 @@ class GoSmartSimulationServerComponent(object):
             loop = asyncio.get_event_loop()
             loop.call_soon_threadsafe(lambda: self.setStatus(guid, "SUCCESS", "Success", "100", timestamp))
             # Run validation (if req)
-            validation = yield from self.current[guid].validation()
-            if validation:
-                loop.call_soon_threadsafe(lambda: self._db.updateValidation(guid, validation))
+            validation = None
+            #validation = yield from self.current[guid].validation()
+            #if validation:
+            #    loop.call_soon_threadsafe(lambda: self._db.updateValidation(guid, validation))
         except:
             validation = None
             logger.exception("Problem with completion/validation")
