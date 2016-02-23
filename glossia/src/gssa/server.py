@@ -41,6 +41,7 @@ except:
 import gssa.comparator
 import gssa.definition
 import gssa.translator
+import gssa.error
 from gssa.error import Error, makeError
 from gssa.config import etc_location
 
@@ -393,7 +394,7 @@ class GoSmartSimulationServerComponent(object):
                 exit_code = 'E_UNKNOWN'
 
         # NB: makeError can return SUCCESS or IN_PROGRESS
-        status = makeError(exit_code, simulation['status'])
+        status = gssa.error.makeError(exit_code, simulation['status'])
         percentage = simulation['percentage']
 
         # This format matches the fail/status/complete events

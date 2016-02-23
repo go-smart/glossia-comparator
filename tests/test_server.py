@@ -243,15 +243,22 @@ def test_doProperties(gsssc , definition):
 
 
 @pytest.mark.asyncio
-def test_doRetrieveStatus(gsssc , definition):
+def test_doRetrieveStatus ( gsssc , monkeypatch , definition ) :
+	# current corresponds to definition
+	#  self correspondss to gsssc
 	random_guid = known_guid
-	#definition._db.retrieve = MagicMock()
-	#definition._db.retrieve.return_value = 1983
+	simulation = { 'exit_code': 'EXITCODE', 'guid': known_guid, 'status': 'STATUS' , 'percentage' : 0.6 , 'directory' : 'home' }
+	gsssc._db.retrieve = MagicMock()
+	gsssc._db.retrieve.return_value = simulation
+	makeError = MagicMock()
+	monkeypatch.setattr("gssa.error.makeError", makeError)
+	makeError.return_value = "MYSTATUS"
 	result = yield from gsssc.doRetrieveStatus(random_guid)
 	yield from wait()
-	#gsssc._db.retrieve.assert_called_with(random_guid)	
-	result = 1983
-	assert ( result == 1983	)            
+	gsssc._db.retrieve.assert_called_with(random_guid)	
+	makeError.assert_called_with(simulation['exit_code'], simulation['status'])	
+	result000 = 1983
+	assert ( result000 == 1983	)            
 	
 
 
