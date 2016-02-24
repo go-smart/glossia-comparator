@@ -242,7 +242,9 @@ class GoSmartSimulationDefinition:
         diagnostic_files = {
             'input': input_directory,
             'input.final': input_final_directory,
-            'logs': log_directory
+            'logs': log_directory,
+            'original.xml': os.path.join(output_directory, 'original.xml'),
+            'guid': os.path.join(output_directory, 'guid'),
         }
 
         logger.debug("Creating tarfile")

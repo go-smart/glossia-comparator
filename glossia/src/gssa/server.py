@@ -383,9 +383,10 @@ class GoSmartSimulationServerComponent(object):
             loop = asyncio.get_event_loop()
             loop.call_soon_threadsafe(lambda: self.setStatus(guid, "SUCCESS", "Success", "100", timestamp))
             # Run validation (if req)
-            validation = yield from self.current[guid].validation()
-            if validation:
-                loop.call_soon_threadsafe(lambda: self._db.updateValidation(guid, validation))
+            validation = None
+            #validation = yield from self.current[guid].validation()
+            #if validation:
+            #    loop.call_soon_threadsafe(lambda: self._db.updateValidation(guid, validation))
         except:
             validation = None
             logger.exception("Problem with completion/validation")
@@ -452,41 +453,24 @@ class GoSmartSimulationServerComponent(object):
     # TODO: this gets unweildy, perhaps it should have an earliest simulation
     # timestamp argument?
     def onRequestAnnounce(self):
-        try:
-            # Go through /every/ simulation
-            simulations = self._db.all()
-            for simulation in simulations:
-                exit_code = simulation['exit_code']
+        # Go through /every/ simulation
+        simulations = self._db.all()
+        for simulation in simulations:
+            exit_code = simulation['exit_code']
 
-                # If it hasn't exited, it should be running...
-                if exit_code is None:
-                    if simulation['guid'] in self.current:
-                        exit_code = 'IN_PROGRESS'
-                    else:
-                        exit_code = 'E_UNKNOWN'
+            # If it hasn't exited, it should be running...
+            if exit_code is None:
+                if simulation['guid'] in self.current:
+                    exit_code = 'IN_PROGRESS'
+                else:
+                    exit_code = 'E_UNKNOWN'
 
-                status = makeError(exit_code, simulation['status'])
-                percentage = simulation['percentage']
+            status = makeError(exit_code, simulation['status'])
+            percentage = simulation['percentage']
 
-                # Tell the world
-                self.publish(u'com.gosmartsimulation.announce', self.server_id, simulation['guid'], (percentage, status), simulation['directory'], simulation['timestamp'], simulation['validation'])
-                logger.debug("Announced: %s %s %r" % (simulation['guid'], simulation['directory'], simulation['validation'] is not None))
-
-        except Exception:
-            # If we can't get it from the database, fall back to the
-            # self.current map
-            for simulation in self.current:
-                exit_status = self.current[simulation].get_exit_status()
-                properties = self.getProperties(simulation)
-                self.publish(
-                    u'com.gosmartsimulation.announce',
-                    self.server_id,
-                    simulation,
-                    (100 if exit_status[0] else 0, makeError('SUCCESS' if exit_status[0] else 'E_UNKNOWN', exit_status[1])),
-                    properties['location'],
-                    time.time()
-                )
-                logger.debug("Announced (from map): %s" % simulation)
+            # Tell the world
+            self.publish(u'com.gosmartsimulation.announce', self.server_id, simulation['guid'], (percentage, status), simulation['directory'], simulation['timestamp'], simulation['validation'])
+            logger.debug("Announced: %s %s %r" % (simulation['guid'], simulation['directory'], simulation['validation'] is not None))
 
         # Follow up with an identify event
         self.onRequestIdentify()
