@@ -108,6 +108,25 @@ class GoSmartSimulationServerComponent(object):
         # Flag this up to be done, but don't wait for it
         loop.call_soon_threadsafe(lambda: self.setDatabase(database()))
 
+    # Retrieve a definition, if not from the current set, from persistent storage
+    @asyncio.coroutine
+    def _fetch_definition(self, guid):
+        if guid in self.current:
+            return self.current[guid]
+
+        fut = asyncio.Future()
+        loop = asyncio.get_event_loop()
+
+        loop.call_soon_threadsafe(lambda: fut.set_result(self._db.retrieve(guid)))
+
+        definition = yield from fut.result()
+
+        if definition:
+            self.current[guid] = definition
+            return definition
+
+        return False
+
     # For start-up, mark everything in-progress in the DB as not-in-progress/unfinished
     def setDatabase(self, database):
         self._db = database
@@ -123,10 +142,9 @@ class GoSmartSimulationServerComponent(object):
     # directory, for instance
     @asyncio.coroutine
     def doClean(self, guid):
-        if guid not in self.current:
+        current = self._fetch_definition(guid)
+        if not current:
             return False
-
-        current = self.current[guid]
 
         result = yield from current.clean()
 
@@ -135,7 +153,8 @@ class GoSmartSimulationServerComponent(object):
     # com.gosmartsimulation.start - execute the simulation in a coro
     @asyncio.coroutine
     def doStart(self, guid):
-        if guid not in self.current:
+        current = self._fetch_definition(guid)
+        if not current:
             return False
 
         loop = asyncio.get_event_loop()
@@ -167,7 +186,9 @@ class GoSmartSimulationServerComponent(object):
         success = fut.result()
         logger.info("Simulation exited [%s]" % guid)
 
-        current = self.current[guid]
+        current = self._fetch_definition(guid)
+        if not current:
+            return False
 
         if success:
             yield from self.eventComplete(guid)
@@ -200,14 +221,14 @@ class GoSmartSimulationServerComponent(object):
     # requested later)
     @asyncio.coroutine
     def doUpdateFiles(self, guid, files):
-        if guid not in self.current or not isinstance(files, dict):
+        current = self._fetch_definition(guid)
+        if not current or not isinstance(files, dict):
             return False
 
         logger.debug("Update Files")
         for local, remote in files.items():
             logger.debug("remote" + remote)
             logger.debug("Local" + local)
-        current = self.current[guid]
         current.update_files(files)
 
         return True
@@ -226,13 +247,12 @@ class GoSmartSimulationServerComponent(object):
     # FIXME: this should be made asynchronous!
     @asyncio.coroutine
     def doRequestResults(self, guid, target):
-        if guid not in self.current:
+        current = self._fetch_definition(guid)
+        if not current:
             logger.info("Simulation [%s] not found" % guid)
             return {}
 
         logger.info("Result bundle requested for [%s]" % guid)
-
-        current = self.current[guid]
 
         result_archive = current.gather_results()
 
@@ -254,13 +274,12 @@ class GoSmartSimulationServerComponent(object):
     # FIXME: this should be made asynchronous!
     @asyncio.coroutine
     def doRequestDiagnostic(self, guid, target):
-        if guid not in self.current:
+        current = self._fetch_definition(guid)
+        if not current:
             logger.info("Simulation [%s] not found" % guid)
             return {}
 
         logger.info("Diagnostic bundle requested for [%s]" % guid)
-
-        current = self.current[guid]
 
         diagnostic_archive = current.gather_diagnostic()
 
@@ -278,10 +297,9 @@ class GoSmartSimulationServerComponent(object):
 
     # Helper routine as several endpoints involve returning file requests
     def _request_files(self, guid, files, target):
-        if guid not in self.current or not isinstance(files, dict):
+        current = self._fetch_definition(guid)
+        if not current or not isinstance(files, dict):
             return {}
-
-        current = self.current[guid]
 
         try:
             uploaded_files = current.push_files(files)
@@ -338,11 +356,10 @@ class GoSmartSimulationServerComponent(object):
     # RPC call so it will almost certainly have returned by time we do
     @asyncio.coroutine
     def doSimulate(self, guid):
-        if guid not in self.current:
+        current = self._fetch_definition(guid)
+        if not current:
             yield from self.eventFail(guid, makeError(Error.E_CLIENT, "Not fully prepared before launching - no current simulation set"))
             success = None
-
-        current = self.current[guid]
 
         logger.debug("Running simulation in %s" % current.get_dir())
 
@@ -368,10 +385,10 @@ class GoSmartSimulationServerComponent(object):
     @asyncio.coroutine
     def doFinalize(self, guid, client_directory_prefix):
         logger.debug("Converting the Xml")
-        if guid not in self.current:
+        current = self._fetch_definition(guid)
+        if not current:
             return False
 
-        current = self.current[guid]
         current.set_remote_dir(client_directory_prefix)
 
         # Make sure the simulation is in the DB
@@ -390,16 +407,18 @@ class GoSmartSimulationServerComponent(object):
 
     # Server-specific properties for this simulation (at present, just wd location)
     def getProperties(self, guid):
-        if guid not in self.current:
+        current = self._fetch_definition(guid)
+        if not current:
             raise RuntimeError("Simulation not found: %s" % guid)
 
-        return {"location": self.current[guid].get_dir()}
+        return {"location": current.get_dir()}
 
     # Called when simulation completes - publishes a completion event
     @asyncio.coroutine
     def eventComplete(self, guid):
         logger.debug("Completed [%s]" % guid)
-        if guid not in self.current:
+        current = self._fetch_definition(guid)
+        if not current:
             logger.warning("Tried to send simulation-specific completion event with no current simulation definition")
 
         # Record the finishing time, as we see it
@@ -419,16 +438,17 @@ class GoSmartSimulationServerComponent(object):
             validation = None
             logger.exception("Problem with completion/validation")
 
-        self.current[guid].set_exit_status(True)
+        current.set_exit_status(True)
         logger.info('Success [%s]' % guid)
 
         # Notify any subscribers
-        self.publish(u'com.gosmartsimulation.complete', guid, makeError('SUCCESS', 'Success'), self.current[guid].get_dir(), timestamp, validation)
+        self.publish(u'com.gosmartsimulation.complete', guid, makeError('SUCCESS', 'Success'), current.get_dir(), timestamp, validation)
 
     # Called when simulation fails - publishes a failure event
     @asyncio.coroutine
     def eventFail(self, guid, message):
-        if guid not in self.current:
+        current = self._fetch_definition(guid)
+        if not current:
             logger.warning("Tried to send simulation-specific failure event with no current simulation definition")
 
         # Record the failure time as we see it
@@ -441,11 +461,11 @@ class GoSmartSimulationServerComponent(object):
         except:
             logger.exception("Problem saving failure status")
 
-        self.current[guid].set_exit_status(False, message)
+        current.set_exit_status(False, message)
         logger.warning('Failure [%s]: %s' % (guid, repr(message)))
 
         # Notify any subscribers
-        self.publish(u'com.gosmartsimulation.fail', guid, message, self.current[guid].get_dir(), timestamp, None)
+        self.publish(u'com.gosmartsimulation.fail', guid, message, current.get_dir(), timestamp, None)
 
     # com.gosmartsimulation.retrieve_status - get the latest status for a
     # simulation
@@ -526,27 +546,28 @@ class GoSmartSimulationServerComponent(object):
                 f.write(message.strip())
 
     # Update the status, setting up a callback for asyncio
-    def updateStatus(self, id, percentage, message):
+    def updateStatus(self, guid, percentage, message):
         timestamp = time.time()
 
         # Write out to the command line for debug
         # TODO: switch to `logger` and `vigilant`
         progress = "%.2lf" % percentage if percentage else '##'
-        logger.debug("%s [%r] ---- %s%%: %s" % (id, timestamp, progress, message))
+        logger.debug("%s [%r] ---- %s%%: %s" % (guid, timestamp, progress, message))
 
         try:
             # Call the setStatus method asynchronously
             loop = asyncio.get_event_loop()
-            loop.call_soon_threadsafe(lambda: self.setStatus(id, 'IN_PROGRESS', message, percentage, timestamp))
+            loop.call_soon_threadsafe(lambda: self.setStatus(guid, 'IN_PROGRESS', message, percentage, timestamp))
         except:
             logger.exception("Problem saving status")
 
         directory = None
-        if id in self.current:
-            directory = self.current[id].get_dir()
+        current = self._fetch_definition(guid)
+        if current:
+            directory = current.get_dir()
 
         # Publish a status update for the WAMP clients to see
-        self.publish('com.gosmartsimulation.status', id, (percentage, makeError('IN_PROGRESS', message)), directory, timestamp, None)
+        self.publish('com.gosmartsimulation.status', guid, (percentage, makeError('IN_PROGRESS', message)), directory, timestamp, None)
 
     # com.gosmartsimulation.request_identify - publish basic server information
     def onRequestIdentify(self):
