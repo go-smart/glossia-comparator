@@ -171,7 +171,7 @@ class SQLiteSimulationDatabase:
             return None
 
         # Simulations should not be added to the database until they are finalized
-        return GoSmartSimulationDefinition(guid, directory, finalized=True)
+        return GoSmartSimulationDefinition(guid, None, directory, None, finalized=True)
 
     def delete(self, simulation, soft=True):
         cursor = self._db.cursor()
