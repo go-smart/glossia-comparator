@@ -260,10 +260,7 @@ class GoSmartSimulationDefinition:
 
     # Turn a list of files into an archive
     def _gather_files(self, archive_name, files):
-        output_directory = os.path.join(self.get_dir(), 'output')
-        missing_file = os.path.join(output_directory, 'missing.txt')
-
-        os.makedirs(output_directory, exist_ok=True)
+        missing_file = os.path.join(self.get_dir(), 'missing.txt')
 
         logger.debug("Creating tarfile")
 
