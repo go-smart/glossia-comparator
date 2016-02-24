@@ -38,6 +38,7 @@ try:
 except:
     use_observant = False
 
+import gssa.transferrer
 import gssa.comparator
 import gssa.definition
 import gssa.translator
@@ -256,6 +257,7 @@ class GoSmartSimulationServerComponent(object):
         logger.info("Result bundle requested for [%s]" % guid)
 
         result_archive = current.gather_results()
+        transferrer = None
 
         if target is None:
             gateway = gssa.utils.get_default_gateway()
@@ -264,10 +266,11 @@ class GoSmartSimulationServerComponent(object):
                 _default_client_port,
                 guid
             )
+            transferrer = gssa.transferrer.transferrer_register['http']()
 
         files = {result_archive: target}
 
-        result = yield from self._request_files(guid, files)
+        result = yield from self._request_files(guid, files, transferrer=transferrer)
         return result
 
     # com.gosmartsimulation.request_diagnostic - push a bundle of diagnostic
@@ -284,6 +287,7 @@ class GoSmartSimulationServerComponent(object):
         logger.info("Diagnostic bundle requested for [%s]" % guid)
 
         diagnostic_archive = current.gather_diagnostic()
+        transferrer = None
 
         if target is None:
             gateway = gssa.utils.get_default_gateway()
@@ -292,21 +296,22 @@ class GoSmartSimulationServerComponent(object):
                 _default_client_port,
                 guid
             )
+            transferrer = gssa.transferrer.transferrer_register['http']()
 
         files = {diagnostic_archive: target}
 
-        result = yield from self._request_files(guid, files)
+        result = yield from self._request_files(guid, files, transferrer=transferrer)
         return result
 
     # Helper routine as several endpoints involve returning file requests
     @asyncio.coroutine
-    def _request_files(self, guid, files):
+    def _request_files(self, guid, files, transferrer=None):
         current = yield from self._fetch_definition(guid)
         if not current or not isinstance(files, dict):
             return {}
 
         try:
-            uploaded_files = current.push_files(files)
+            uploaded_files = current.push_files(files, transferrer=transferrer)
         except Exception:
             logger.exception("Problem pushing files")
             return {}

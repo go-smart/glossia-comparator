@@ -283,10 +283,13 @@ class GoSmartSimulationDefinition:
         return archive
 
     # Send back the results
-    def push_files(self, files):
+    def push_files(self, files, transferrer=None):
         if self._shadowing:
             logger.warning("Not simulating: shadowing mode ON for this definition")
             return {}
+
+        if transferrer is None:
+            transferrer = self._transferrer
 
         uploaded_files = {}
 
@@ -297,9 +300,9 @@ class GoSmartSimulationDefinition:
             else:
                 logger.warning("Could not find %s for pushing" % path)
 
-        self._transferrer.connect()
-        self._transferrer.push_files(uploaded_files, self.get_dir(), self.get_remote_dir())
-        self._transferrer.disconnect()
+        transferrer.connect()
+        transferrer.push_files(uploaded_files, self.get_dir(), self.get_remote_dir())
+        transferrer.disconnect()
 
         return uploaded_files
 
