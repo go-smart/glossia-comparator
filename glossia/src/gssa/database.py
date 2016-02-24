@@ -156,10 +156,13 @@ class SQLiteSimulationDatabase:
             SELECT *
             FROM simulations
             WHERE guid=? AND deleted=0
-        ''', guid)
+        ''', (guid,))
         try:
             simulation_row = cursor.fetchone()
         except Exception:
+            return None
+
+        if not simulation_row:
             return None
 
         directory = simulation_row['directory']

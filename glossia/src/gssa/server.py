@@ -119,7 +119,7 @@ class GoSmartSimulationServerComponent(object):
 
         loop.call_soon_threadsafe(lambda: fut.set_result(self._db.retrieve(guid)))
 
-        definition = yield from fut.result()
+        definition = yield from fut
 
         if definition:
             self.current[guid] = definition
@@ -142,7 +142,7 @@ class GoSmartSimulationServerComponent(object):
     # directory, for instance
     @asyncio.coroutine
     def doClean(self, guid):
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current:
             return False
 
@@ -153,7 +153,7 @@ class GoSmartSimulationServerComponent(object):
     # com.gosmartsimulation.start - execute the simulation in a coro
     @asyncio.coroutine
     def doStart(self, guid):
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current:
             return False
 
@@ -186,7 +186,7 @@ class GoSmartSimulationServerComponent(object):
         success = fut.result()
         logger.info("Simulation exited [%s]" % guid)
 
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current:
             return False
 
@@ -221,7 +221,7 @@ class GoSmartSimulationServerComponent(object):
     # requested later)
     @asyncio.coroutine
     def doUpdateFiles(self, guid, files):
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current or not isinstance(files, dict):
             return False
 
@@ -247,7 +247,7 @@ class GoSmartSimulationServerComponent(object):
     # FIXME: this should be made asynchronous!
     @asyncio.coroutine
     def doRequestResults(self, guid, target):
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current:
             logger.info("Simulation [%s] not found" % guid)
             return {}
@@ -266,7 +266,8 @@ class GoSmartSimulationServerComponent(object):
 
         files = {result_archive: target}
 
-        return self.request_files(guid, files)
+        result = yield from self._request_files(guid, files)
+        return result
 
     # com.gosmartsimulation.request_diagnostic - push a bundle of diagnostic
     # files through the transferrer. If target is None, assume gateway is
@@ -274,7 +275,7 @@ class GoSmartSimulationServerComponent(object):
     # FIXME: this should be made asynchronous!
     @asyncio.coroutine
     def doRequestDiagnostic(self, guid, target):
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current:
             logger.info("Simulation [%s] not found" % guid)
             return {}
@@ -293,11 +294,13 @@ class GoSmartSimulationServerComponent(object):
 
         files = {diagnostic_archive: target}
 
-        return self.request_files(guid, files)
+        result = yield from self._request_files(guid, files)
+        return result
 
     # Helper routine as several endpoints involve returning file requests
+    @asyncio.coroutine
     def _request_files(self, guid, files, target):
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current or not isinstance(files, dict):
             return {}
 
@@ -338,7 +341,7 @@ class GoSmartSimulationServerComponent(object):
                 translator,
                 finalized=False,
                 ignore_development=self._ignore_development,
-                update_status_callback=lambda p, m: self.updateStatus(guid, p, m)
+                update_status_callback=lambda p, m: asyncio.async(self.updateStatus(guid, p, m))
             )
 
             # Announce that XML has been uploaded
@@ -356,7 +359,7 @@ class GoSmartSimulationServerComponent(object):
     # RPC call so it will almost certainly have returned by time we do
     @asyncio.coroutine
     def doSimulate(self, guid):
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current:
             yield from self.eventFail(guid, makeError(Error.E_CLIENT, "Not fully prepared before launching - no current simulation set"))
             success = None
@@ -364,7 +367,7 @@ class GoSmartSimulationServerComponent(object):
         logger.debug("Running simulation in %s" % current.get_dir())
 
         # Inform the user that we got this far
-        self.updateStatus(guid, 0, "Starting simulation...")
+        yield from self.updateStatus(guid, 0, "Starting simulation...")
         # Start the socket server before simulating
         yield from current.init_percentage_socket_server()
 
@@ -385,7 +388,7 @@ class GoSmartSimulationServerComponent(object):
     @asyncio.coroutine
     def doFinalize(self, guid, client_directory_prefix):
         logger.debug("Converting the Xml")
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current:
             return False
 
@@ -403,11 +406,13 @@ class GoSmartSimulationServerComponent(object):
     # properties
     @asyncio.coroutine
     def doProperties(self, guid):
-        return self.getProperties(guid)
+        result = yield from self.getProperties(guid)
+        return result
 
     # Server-specific properties for this simulation (at present, just wd location)
+    @asyncio.coroutine
     def getProperties(self, guid):
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current:
             raise RuntimeError("Simulation not found: %s" % guid)
 
@@ -417,7 +422,7 @@ class GoSmartSimulationServerComponent(object):
     @asyncio.coroutine
     def eventComplete(self, guid):
         logger.debug("Completed [%s]" % guid)
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current:
             logger.warning("Tried to send simulation-specific completion event with no current simulation definition")
 
@@ -447,7 +452,7 @@ class GoSmartSimulationServerComponent(object):
     # Called when simulation fails - publishes a failure event
     @asyncio.coroutine
     def eventFail(self, guid, message):
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if not current:
             logger.warning("Tried to send simulation-specific failure event with no current simulation definition")
 
@@ -546,6 +551,7 @@ class GoSmartSimulationServerComponent(object):
                 f.write(message.strip())
 
     # Update the status, setting up a callback for asyncio
+    @asyncio.coroutine
     def updateStatus(self, guid, percentage, message):
         timestamp = time.time()
 
@@ -562,7 +568,7 @@ class GoSmartSimulationServerComponent(object):
             logger.exception("Problem saving status")
 
         directory = None
-        current = self._fetch_definition(guid)
+        current = yield from self._fetch_definition(guid)
         if current:
             directory = current.get_dir()
 
