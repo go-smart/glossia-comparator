@@ -149,8 +149,29 @@ class SQLiteSimulationDatabase:
         simulations = cursor.fetchall()
         return simulations
 
+    def search(self, guid_start):
+        cursor = self._db.cursor()
+        cursor.execute('''
+            SELECT *
+            FROM simulations
+            WHERE guid LIKE :guid AND deleted=0
+        ''', {'guid': ('%s%%' % guid_start)})
+        try:
+            simulation_rows = cursor.fetchall()
+        except Exception:
+            return None
+
+        # Simulations should not be added to the database until they are finalized
+        buildsim = lambda s: GoSmartSimulationDefinition(s['guid'], None, s['directory'], None, finalized=True)
+        simulations = {s['guid']: buildsim(s) for s in simulation_rows if os.path.exists(s['directory'])}
+
+        return simulations
+
     # Get a simulation by the client's GUID
     def retrieve(self, guid):
+        if len(guid) < 32:
+            return self.search(guid)
+
         cursor = self._db.cursor()
         cursor.execute('''
             SELECT *

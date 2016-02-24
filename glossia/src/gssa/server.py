@@ -112,8 +112,16 @@ class GoSmartSimulationServerComponent(object):
     # Retrieve a definition, if not from the current set, from persistent storage
     @asyncio.coroutine
     def _fetch_definition(self, guid):
+        guid = guid.upper()
+
         if guid in self.current:
             return self.current[guid]
+
+        guids = []
+        if len(guid) < 32:
+            guids = [g for g in self.current if g.startswith(guid)]
+            if len(guids) > 1:
+                raise RuntimeError("More than one matching GUID")
 
         fut = asyncio.Future()
         loop = asyncio.get_event_loop()
@@ -122,11 +130,24 @@ class GoSmartSimulationServerComponent(object):
 
         definition = yield from fut
 
-        if definition:
-            self.current[guid] = definition
-            return definition
+        if len(guid) < 32:
+            guids += definition.keys()
 
-        return False
+            if len(guids) > 1:
+                raise RuntimeError("More than one matching GUID")
+            elif not guids:
+                return False
+
+            guid = guids[0]
+
+            if guid not in self.current:
+                self.current[guid] = definition[guid]
+        elif definition:
+            self.current[guid] = definition
+        else:
+            return False
+
+        return self.current[guid]
 
     # For start-up, mark everything in-progress in the DB as not-in-progress/unfinished
     def setDatabase(self, database):
