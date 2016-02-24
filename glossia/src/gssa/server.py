@@ -239,7 +239,8 @@ class GoSmartSimulationServerComponent(object):
     def doRequestFiles(self, guid, files):
         logger.info("Files requested for [%s]" % guid)
 
-        return self.request_files(guid, files)
+        result = yield from self._request_files(guid, files)
+        return result
 
     # com.gosmartsimulation.request_results - push a bundle of output
     # files through the transferrer. If target is None, assume gateway is
@@ -299,7 +300,7 @@ class GoSmartSimulationServerComponent(object):
 
     # Helper routine as several endpoints involve returning file requests
     @asyncio.coroutine
-    def _request_files(self, guid, files, target):
+    def _request_files(self, guid, files):
         current = yield from self._fetch_definition(guid)
         if not current or not isinstance(files, dict):
             return {}

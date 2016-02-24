@@ -148,7 +148,7 @@ class GoSmartSimulationServerSession(ApplicationSession):
                 self.register(self.doUpdateFiles, u'com.gosmartsimulation%s.update_files' % i)
                 self.register(self.doRequestFiles, u'com.gosmartsimulation%s.request_files' % i)
                 self.register(self.doRequestDiagnostic, u'com.gosmartsimulation%s.request_diagnostic' % i)
-                self.register(self.doRequestDiagnostic, u'com.gosmartsimulation%s.request_results' % i)
+                self.register(self.doRequestResults, u'com.gosmartsimulation%s.request_results' % i)
                 self.register(self.doTmpValidation, u'com.gosmartsimulation%s.tmp_validation' % i)
                 self.register(self.doFinalize, u'com.gosmartsimulation%s.finalize' % i)
                 self.register(self.doClean, u'com.gosmartsimulation%s.clean' % i)
