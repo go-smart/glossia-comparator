@@ -107,27 +107,28 @@ class GoSmartSimulationDefinition:
         self._update_status_callback = update_status_callback
         self._ignore_development = ignore_development
 
-        # Do first parse of the GSSA-XML
-        try:
-            self.create_xml_from_string(xml_string)
-        except Exception as e:
-            logger.error(e)
-
-        # Create the input directory, ready for the STL surfaces
-        input_dir = os.path.join(tmpdir, 'input')
-        if not os.path.exists(input_dir):
+        if not finalized:
+            # Do first parse of the GSSA-XML
             try:
-                os.mkdir(input_dir)
-            except Exception:
-                logger.exception('Could not create input directory')
+                self.create_xml_from_string(xml_string)
+            except Exception as e:
+                logger.error(e)
 
-        # Write the GSSA-XML there for safekeeping
-        with open(os.path.join(tmpdir, "original.xml"), "w") as f:
-            f.write(xml_string)
+            # Create the input directory, ready for the STL surfaces
+            input_dir = os.path.join(tmpdir, 'input')
+            if not os.path.exists(input_dir):
+                try:
+                    os.mkdir(input_dir)
+                except Exception:
+                    logger.exception('Could not create input directory')
 
-        # Make a note of the client GUID, in case we need to track backwards
-        with open(os.path.join(tmpdir, "guid"), "w") as f:
-            f.write(guid)
+            # Write the GSSA-XML there for safekeeping
+            with open(os.path.join(tmpdir, "original.xml"), "w") as f:
+                f.write(xml_string)
+
+            # Make a note of the client GUID, in case we need to track backwards
+            with open(os.path.join(tmpdir, "guid"), "w") as f:
+                f.write(guid)
 
     # This directory indicates where on the client's system we should be
     # pulling/pushing from/to
