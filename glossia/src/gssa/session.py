@@ -113,12 +113,14 @@ class GoSmartSimulationServerSession(ApplicationSession):
 
     # com.gosmartsimulation.request_announce - release a status report on each
     # simulation in the database
-    # TODO: this gets unweildy, perhaps it should have an earliest simulation
+    # TODO: this gets unwieldy, perhaps it should have an earliest simulation
     # timestamp argument?
+    @asyncio.coroutine
     def onRequestAnnounce(self):
-        self._component.doRequestIdentify()
+        self._component.doRequestAnnounce()
 
     # com.gosmartsimulation.request_identify - publish basic server information
+    @asyncio.coroutine
     def onRequestIdentify(self):
         self._component.onRequestIdentify()
 

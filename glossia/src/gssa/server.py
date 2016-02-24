@@ -449,10 +449,11 @@ class GoSmartSimulationServerComponent(object):
 
     # com.gosmartsimulation.request_announce - release a status report on each
     # simulation in the database
-    # TODO: this gets unweildy, perhaps it should have an earliest simulation
+    # TODO: this gets unwieldy, perhaps it should have an earliest simulation
     # timestamp argument?
     def onRequestAnnounce(self):
         # Go through /every/ simulation
+        return 1
         simulations = self._db.all()
         for simulation in simulations:
             exit_code = simulation['exit_code']
