@@ -216,25 +216,37 @@ class GoSmartSimulationServerComponent(object):
     # through the transferrer and return the list that was sent
     @asyncio.coroutine
     def doRequestFiles(self, guid, files):
-        if guid not in self.current or not isinstance(files, dict):
+        logger.info("Files requested for [%s]" % guid)
+
+        return self.request_files(guid, files)
+
+    # com.gosmartsimulation.request_results - push a bundle of output
+    # files through the transferrer. If target is None, assume gateway is
+    # running a temporary HTTP on default client port
+    # FIXME: this should be made asynchronous!
+    @asyncio.coroutine
+    def doRequestResults(self, guid, target):
+        if guid not in self.current:
+            logger.info("Simulation [%s] not found" % guid)
             return {}
+
+        logger.info("Result bundle requested for [%s]" % guid)
 
         current = self.current[guid]
 
-        try:
-            uploaded_files = current.push_files(files)
-        except Exception:
-            logger.exception("Problem pushing files")
-            return {}
+        result_archive = current.gather_results()
 
-        return uploaded_files
+        if target is None:
+            gateway = gssa.utils.get_default_gateway()
+            target = "http://%s:%d/%s.tgz" % (
+                gateway,
+                _default_client_port,
+                guid
+            )
 
-    # com.gosmartsimulation.compare - check whether two GSSA-XML files match
-    # and, if not, what their differences are
-    @asyncio.coroutine
-    def doCompare(self, this_xml, that_xml):
-        comparator = gssa.comparator.Comparator(this_xml, that_xml)
-        return comparator.diff()
+        files = {result_archive: target}
+
+        return self.request_files(guid, files)
 
     # com.gosmartsimulation.request_diagnostic - push a bundle of diagnostic
     # files through the transferrer. If target is None, assume gateway is
@@ -261,15 +273,32 @@ class GoSmartSimulationServerComponent(object):
             )
 
         files = {diagnostic_archive: target}
+
+        return self.request_files(guid, files)
+
+    # Helper routine as several endpoints involve returning file requests
+    def _request_files(self, guid, files, target):
+        if guid not in self.current or not isinstance(files, dict):
+            return {}
+
+        current = self.current[guid]
+
         try:
             uploaded_files = current.push_files(files)
         except Exception:
             logger.exception("Problem pushing files")
             return {}
 
-        logger.info("Diagnostic bundle sent")
+        logger.info("Files sent")
 
         return uploaded_files
+
+    # com.gosmartsimulation.compare - check whether two GSSA-XML files match
+    # and, if not, what their differences are
+    @asyncio.coroutine
+    def doCompare(self, this_xml, that_xml):
+        comparator = gssa.comparator.Comparator(this_xml, that_xml)
+        return comparator.diff()
 
     # com.gosmartsimulation.update_settings_xml - set the GSSA-XML for a given
     # simulation
