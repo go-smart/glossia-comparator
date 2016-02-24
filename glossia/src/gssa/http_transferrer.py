@@ -1,5 +1,4 @@
 from zope.interface import implementer
-import shutil
 import urllib.request as urllib2
 import os
 import logging
@@ -41,13 +40,8 @@ class HTTPTransferrer:
     def push_files(self, files, root, remote_root):
         for local, remote in files.items():
             absolute_path = os.path.join(root, local)
-            if self._output == "tmp":
-                remote_absolute_path = os.path.join(remote_root, remote)
-                logger.debug("Putting %s %s" % (absolute_path, remote_absolute_path))
-                shutil.copy(absolute_path, os.path.join('/tmp', remote_absolute_path))
-            else:
-                logger.debug("Uploading from: " + absolute_path + " to:" + remote)
-                self.uploadFile(absolute_path, remote)
+            logger.debug("Uploading from: " + absolute_path + " to:" + remote)
+            self.uploadFile(absolute_path, remote)
 
     # This just grabs using urllib GET
     def downloadFile(self, sourceUrlStr, destinationStr):
