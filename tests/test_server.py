@@ -243,11 +243,11 @@ def test_doProperties(gsssc , definition):
 
 
 @pytest.mark.asyncio
-def test_doRetrieveStatus ( gsssc , monkeypatch , definition ) :
+def test_doRetrieveStatus ( gsssc , monkeypatch , definition ):
 	# current corresponds to definition
 	#  self correspondss to gsssc
 	random_guid = known_guid
-	simulation = { 'exit_code': 'EXITCODE', 'guid': known_guid, 'status': 'STATUS' , 'percentage' : 0.6 , 'directory' : 'home' }
+	simulation = { 'exit_code': 'EXITCODE', 'guid': known_guid, 'status': 'STATUS' , 'percentage' : 0.6 , 'directory' : 'home' , 'timestamp' : 'zerohour' , 'validation' : 'valid'  }
 	gsssc._db.retrieve = MagicMock()
 	gsssc._db.retrieve.return_value = simulation
 	makeError = MagicMock()
@@ -259,6 +259,18 @@ def test_doRetrieveStatus ( gsssc , monkeypatch , definition ) :
 	makeError.assert_called_with(simulation['exit_code'], simulation['status'])	
 	result000 = 1983
 	assert ( result000 == 1983	)            
+
+
+
+@pytest.mark.asyncio
+def test_doRequestDiagnostic ( gsssc , monkeypatch , definition ):	
+	random_guid   	= known_guid
+	random_target	= MagicMock()
+	result = yield from gsssc.doRequestDiagnostic ( random_guid, random_target)
+	definition.gather_diagnostic.assert_called_with()	
+	definition.push_files.assert_called_with({definition.gather_diagnostic(): random_target})	
+	assert ( result is definition.push_files({definition.gather_diagnostic(): random_target})	) 	
+	
 	
 
 
