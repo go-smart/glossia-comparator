@@ -266,7 +266,7 @@ class GoSmartSimulationDefinition:
 
         logger.debug("Creating tarfile")
 
-        archive = os.path.join(output_directory, archive_name)
+        archive = os.path.join(self.get_dir(), archive_name)
 
         with tarfile.open(archive, mode='w:gz') as definition_tar:
             with open(missing_file, 'w') as missing:
