@@ -117,7 +117,7 @@ class GoSmartSimulationServerSession(ApplicationSession):
     # timestamp argument?
     @asyncio.coroutine
     def onRequestAnnounce(self):
-        self._component.doRequestAnnounce()
+        self._component.onRequestAnnounce()
 
     # com.gosmartsimulation.request_identify - publish basic server information
     @asyncio.coroutine
