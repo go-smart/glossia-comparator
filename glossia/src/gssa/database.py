@@ -155,8 +155,8 @@ class SQLiteSimulationDatabase:
         cursor.execute('''
             SELECT *
             FROM simulations
-            WHERE guid=? AND deleted=0
-        ''', (guid,))
+            WHERE guid=:guid AND deleted=0
+        ''', {'guid': guid})
         try:
             simulation_row = cursor.fetchone()
         except Exception:
