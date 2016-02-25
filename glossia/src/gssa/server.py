@@ -167,6 +167,8 @@ class GoSmartSimulationServerComponent(object):
             else:
                 return {}
 
+        definitions = {k: d.summary() for k, d in definitions.values()}
+
         return definitions
 
     # For start-up, mark everything in-progress in the DB as not-in-progress/unfinished
@@ -483,8 +485,8 @@ class GoSmartSimulationServerComponent(object):
             loop.call_soon_threadsafe(lambda: self.setStatus(guid, "SUCCESS", "Success", "100", timestamp))
             # Run validation (if req)
             validation = None
-            #validation = yield from self.current[guid].validation()
-            #if validation:
+            # validation = yield from self.current[guid].validation()
+            # if validation:
             #    loop.call_soon_threadsafe(lambda: self._db.updateValidation(guid, validation))
         except:
             validation = None

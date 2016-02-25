@@ -163,7 +163,12 @@ class SQLiteSimulationDatabase:
             return None
 
         # Simulations should not be added to the database until they are finalized
-        buildsim = lambda s: GoSmartSimulationDefinition(s['guid'], None, s['directory'], None, finalized=True)
+        def buildsim(s):
+            d = GoSmartSimulationDefinition(s['guid'], None, s['directory'], None, finalized=True)
+            d._status = {'percentage': s['percentage'], 'message': s['status'], 'timestamp': s['timestamp']}
+            d.set_exit_status(s['exit_code'], s['status'])
+            return d
+
         simulations = {s['guid']: buildsim(s) for s in simulation_rows if os.path.exists(s['directory'])}
 
         return simulations
