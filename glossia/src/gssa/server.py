@@ -169,7 +169,7 @@ class GoSmartSimulationServerComponent(object):
             else:
                 return {}
 
-        definitions = {k: d.summary() for k, d in definitions.values()}
+        definitions = {k: d.summary() for k, d in definitions.items()}
 
         return definitions
 
