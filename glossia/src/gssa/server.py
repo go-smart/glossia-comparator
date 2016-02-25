@@ -145,7 +145,7 @@ class GoSmartSimulationServerComponent(object):
                 return guid, False
 
             short_guid = guid
-            guid, current = list(definition.items()).pop()
+            guid, current = definition.popitem()
             logger.info("Matched {short_guid} to {guid}".format(short_guid=short_guid, guid=guid))
 
             if guid not in self.current:
@@ -306,7 +306,7 @@ class GoSmartSimulationServerComponent(object):
 
         if target is None:
             gateway = gssa.utils.get_default_gateway()
-            target = "http://%s:%d/%s.tgz" % (
+            target = "http://%s:%d/receive" % (
                 gateway,
                 _default_client_port,
                 guid
@@ -336,7 +336,7 @@ class GoSmartSimulationServerComponent(object):
 
         if target is None:
             gateway = gssa.utils.get_default_gateway()
-            target = "http://%s:%d/%s.tgz" % (
+            target = "http://%s:%d/receive" % (
                 gateway,
                 _default_client_port,
                 guid
