@@ -161,16 +161,19 @@ class GoSmartSimulationServerComponent(object):
     @asyncio.coroutine
     def doSearch(self, guid):
         definitions = yield from self._fetch_definition(guid, allow_many=True)
+        logging.info('Searching for %s' % guid)
 
         # If one or zero results are available, they are returned as a GUID/def pair
         if isinstance(definitions, tuple):
             if definitions[1]:
                 definitions = {definitions[0]: definitions[1]}
             else:
+                logging.info('Found no matches')
                 return {}
 
         definitions = {k: d.summary() for k, d in definitions.items()}
 
+        logging.info('Found %d matches' % len(definitions))
         return definitions
 
     # For start-up, mark everything in-progress in the DB as not-in-progress/unfinished

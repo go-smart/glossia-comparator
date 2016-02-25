@@ -18,6 +18,7 @@
 import os
 import shutil
 import tarfile
+import time
 import logging
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ class GoSmartSimulationDefinition:
     _exit_status = None
     _model_builder = None
     _shadowing = False
+    _status = None
 
     # Set the status to be recorded in the DB
     def set_exit_status(self, success, message=None):
@@ -74,6 +76,7 @@ class GoSmartSimulationDefinition:
                 percentage = None
 
             # Call the server's callback
+            self._status = {'percentage': percentage, 'message': message, 'timestamp': time.time()}
             self._update_status_callback(percentage, message)
 
     # Start up the status server
@@ -129,6 +132,16 @@ class GoSmartSimulationDefinition:
             # Make a note of the client GUID, in case we need to track backwards
             with open(os.path.join(tmpdir, "guid"), "w") as f:
                 f.write(guid)
+
+    # Provide a handy synopsis
+    def summary(self):
+        return {
+            'guid': self._guid,
+            'directory': self._dir,
+            'finalized': self._finalized,
+            'exit_status': self._exit_status,
+            'status': self._status
+        }
 
     # This directory indicates where on the client's system we should be
     # pulling/pushing from/to
