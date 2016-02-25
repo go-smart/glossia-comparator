@@ -17,7 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import shutil
-import sys
 import tarfile
 import logging
 
@@ -108,27 +107,28 @@ class GoSmartSimulationDefinition:
         self._update_status_callback = update_status_callback
         self._ignore_development = ignore_development
 
-        # Do first parse of the GSSA-XML
-        try:
-            self.create_xml_from_string(xml_string)
-        except Exception as e:
-            logger.error(e)
-
-        # Create the input directory, ready for the STL surfaces
-        input_dir = os.path.join(tmpdir, 'input')
-        if not os.path.exists(input_dir):
+        if not finalized:
+            # Do first parse of the GSSA-XML
             try:
-                os.mkdir(input_dir)
-            except Exception:
-                logger.exception('Could not create input directory')
+                self.create_xml_from_string(xml_string)
+            except Exception as e:
+                logger.error(e)
 
-        # Write the GSSA-XML there for safekeeping
-        with open(os.path.join(tmpdir, "original.xml"), "w") as f:
-            f.write(xml_string)
+            # Create the input directory, ready for the STL surfaces
+            input_dir = os.path.join(tmpdir, 'input')
+            if not os.path.exists(input_dir):
+                try:
+                    os.mkdir(input_dir)
+                except Exception:
+                    logger.exception('Could not create input directory')
 
-        # Make a note of the client GUID, in case we need to track backwards
-        with open(os.path.join(tmpdir, "guid"), "w") as f:
-            f.write(guid)
+            # Write the GSSA-XML there for safekeeping
+            with open(os.path.join(tmpdir, "original.xml"), "w") as f:
+                f.write(xml_string)
+
+            # Make a note of the client GUID, in case we need to track backwards
+            with open(os.path.join(tmpdir, "guid"), "w") as f:
+                f.write(guid)
 
     # This directory indicates where on the client's system we should be
     # pulling/pushing from/to
@@ -227,6 +227,20 @@ class GoSmartSimulationDefinition:
 
         return True
 
+    # Create a results archive
+    def gather_results(self):
+        output_directory = os.path.join(self.get_dir(), 'output')
+        output_final_directory = os.path.join(self.get_dir(), 'output.final')
+
+        result_files = {
+            'output': output_directory,
+            'output.final': output_final_directory,
+            'original.xml': os.path.join(self.get_dir(), 'original.xml'),
+            'guid': os.path.join(self.get_dir(), 'guid'),
+        }
+
+        return self._gather_files('results_archive.tgz', result_files)
+
     # Create a diagnostic archive
     def gather_diagnostic(self):
         input_directory = os.path.join(self.get_dir(), 'input')
@@ -234,24 +248,27 @@ class GoSmartSimulationDefinition:
         output_directory = os.path.join(self.get_dir(), 'output')
         log_directory = os.path.join(output_directory, 'logs')
 
-        os.makedirs(output_directory, exist_ok=True)
-
-        diagnostic_archive = os.path.join(output_directory, 'diagnostic_archive.tgz')
-        missing_file = os.path.join(output_directory, 'diagnostic_missing.txt')
-
         diagnostic_files = {
             'input': input_directory,
             'input.final': input_final_directory,
             'logs': log_directory,
-            'original.xml': os.path.join(output_directory, 'original.xml'),
-            'guid': os.path.join(output_directory, 'guid'),
+            'original.xml': os.path.join(self.get_dir(), 'original.xml'),
+            'guid': os.path.join(self.get_dir(), 'guid'),
         }
+
+        return self._gather_files('diagnostic_archive.tgz', diagnostic_files)
+
+    # Turn a list of files into an archive
+    def _gather_files(self, archive_name, files):
+        missing_file = os.path.join(self.get_dir(), 'missing.txt')
 
         logger.debug("Creating tarfile")
 
-        with tarfile.open(diagnostic_archive, mode='w:gz') as definition_tar:
+        archive = os.path.join(self.get_dir(), archive_name)
+
+        with tarfile.open(archive, mode='w:gz') as definition_tar:
             with open(missing_file, 'w') as missing:
-                for f, loc in diagnostic_files.items():
+                for f, loc in files.items():
                     try:
                         definition_tar.add(loc, arcname='%s/%s' % (self._guid, f))
                     except Exception as e:
@@ -260,13 +277,16 @@ class GoSmartSimulationDefinition:
 
         logger.debug("Created tarfile")
 
-        return diagnostic_archive
+        return archive
 
     # Send back the results
-    def push_files(self, files):
+    def push_files(self, files, transferrer=None):
         if self._shadowing:
             logger.warning("Not simulating: shadowing mode ON for this definition")
             return {}
+
+        if transferrer is None:
+            transferrer = self._transferrer
 
         uploaded_files = {}
 
@@ -277,9 +297,9 @@ class GoSmartSimulationDefinition:
             else:
                 logger.warning("Could not find %s for pushing" % path)
 
-        self._transferrer.connect()
-        self._transferrer.push_files(uploaded_files, self.get_dir(), self.get_remote_dir())
-        self._transferrer.disconnect()
+        transferrer.connect()
+        transferrer.push_files(uploaded_files, self.get_dir(), self.get_remote_dir())
+        transferrer.disconnect()
 
         return uploaded_files
 
