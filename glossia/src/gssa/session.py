@@ -147,6 +147,7 @@ class GoSmartSimulationServerSession(ApplicationSession):
                 self.subscribe(self.onRequestAnnounce, u'com.gosmartsimulation%s.request_announce' % i)
                 self.subscribe(self.onRequestIdentify, u'com.gosmartsimulation%s.request_identify' % i)
 
+                self.register(self.doSearch, u'com.gosmartsimulation%s.search' % i)
                 self.register(self.doInit, u'com.gosmartsimulation%s.init' % i)
                 self.register(self.doStart, u'com.gosmartsimulation%s.start' % i)
                 self.register(self.doUpdateSettingsXml, u'com.gosmartsimulation%s.update_settings_xml' % i)
