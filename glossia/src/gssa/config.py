@@ -34,6 +34,10 @@ __config_file = None
 def init_logger(name):
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+    if get('logging.txaio', False):
+        import txaio
+        txaio.start_logging()
+
 
 def init_config(config_file=None):
     global __config, __config_file
