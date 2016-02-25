@@ -145,7 +145,7 @@ class GoSmartSimulationServerComponent(object):
                 return guid, False
 
             short_guid = guid
-            guid, current = definition.items()[0]
+            guid, current = list(definition.items()).pop()
             logger.info("Matched {short_guid} to {guid}".format(short_guid=short_guid, guid=guid))
 
             if guid not in self.current:
