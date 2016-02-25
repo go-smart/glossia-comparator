@@ -151,11 +151,12 @@ class SQLiteSimulationDatabase:
 
     def search(self, guid_start):
         cursor = self._db.cursor()
+        guid = str(guid_start) + '%'
         cursor.execute('''
             SELECT *
             FROM simulations
             WHERE guid LIKE :guid AND deleted=0
-        ''', {'guid': ('%s%%' % guid_start)})
+        ''', {'guid': guid})
         try:
             simulation_rows = cursor.fetchall()
         except Exception:
