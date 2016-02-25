@@ -10,8 +10,8 @@ from gssa.server import GoSmartSimulationServerComponent
 import gssa.comparator
 
 
-known_guid   = str(uuid.uuid4())
-unknown_guid = str(uuid.uuid4())
+known_guid   = str(uuid.uuid4()).upper()
+unknown_guid = str(uuid.uuid4()).upper()
 
 
 def magic_coro():
@@ -50,6 +50,11 @@ def gsssc(definition, event_loop):
         use_observant
     )
 
+    gsssc.setDatabase = MagicMock()
+    gsssc._db = MagicMock()
+    fd, fd_coro = magic_coro()
+    gsssc._fetch_definition = fd_coro
+    fd.side_effect = lambda g: (g, (definition if g == known_guid else False))
     gsssc.current[known_guid] = definition
 
     return gsssc
@@ -139,7 +144,7 @@ def test_request_files_succeeds(gsssc, definition):
     yield from wait()
 
     # Check the files were passed to the current definition
-    definition.push_files.assert_called_with(files)
+    definition.push_files.assert_called_with(files, transferrer=None)
 
     assert(result is uploaded_files)
 
@@ -156,7 +161,7 @@ def test_request_files_fails_on_uploaded_error(gsssc, definition):
     yield from wait()
 
     # Check the files were passed to the current definition
-    definition.push_files.assert_called_with(files)
+    definition.push_files.assert_called_with(files, transferrer=None)
 
     assert(result == {})
 
@@ -215,10 +220,12 @@ def test_doSimulate ( gsssc , definition ):
 def test_doFinalize(gsssc , definition):
     random_guid = known_guid # since it appears in the main class too
     definition.finalize.return_value = 1983
+    gsssc._db = MagicMock()
     result = yield from gsssc.doFinalize(random_guid,"/home56") # as previously
     yield from wait() # as always...
     definition.finalize.assert_called_with()
     definition.set_remote_dir.assert_called_with("/home56")
+    gsssc._db.addOrUpdate.assert_called_with(definition)
     #the result is derived from current.finalize()
     assert ( result == 1983 ) # or maybe false ? not sure...
     
@@ -228,8 +235,8 @@ def test_doFinalize(gsssc , definition):
 def test_doProperties(gsssc , definition):
     #simulate, sc = magic_coro()
     random_guid = known_guid
-    gsssc.getProperties = MagicMock()
-    gsssc.getProperties.return_value = 1983
+    getProperties, gsssc.getProperties = magic_coro()
+    getProperties.return_value = 1983
     result = yield from gsssc.doProperties(random_guid)
     yield from wait()
     # we have set in line 228 that getProperties is a MagicMock
@@ -238,7 +245,7 @@ def test_doProperties(gsssc , definition):
     # invoking the original getProperties function
     # (as stated in server.py
     # it will invoke our own self-made random object
-    gsssc.getProperties.assert_called_with(random_guid) 
+    getProperties.assert_called_with(random_guid) 
     assert ( result == 1983 )
 
 
@@ -269,8 +276,8 @@ def test_doRequestDiagnostic ( gsssc , monkeypatch , definition ):
     random_target   = MagicMock()
     result = yield from gsssc.doRequestDiagnostic ( random_guid, random_target)
     definition.gather_diagnostic.assert_called_with()   
-    definition.push_files.assert_called_with({definition.gather_diagnostic(): random_target})   
-    assert ( result is definition.push_files({definition.gather_diagnostic(): random_target})   )   
+    definition.push_files.assert_called_with({definition.gather_diagnostic(): random_target}, transferrer=None)   
+    assert ( result is definition.push_files({definition.gather_diagnostic(): random_target}, transferrer=None)   )   
     
     
 
