@@ -308,8 +308,7 @@ class GoSmartSimulationServerComponent(object):
             gateway = gssa.utils.get_default_gateway()
             target = "http://%s:%d/receive" % (
                 gateway,
-                _default_client_port,
-                guid
+                _default_client_port
             )
             transferrer = gssa.transferrer.transferrer_register['http']()
 
@@ -338,8 +337,7 @@ class GoSmartSimulationServerComponent(object):
             gateway = gssa.utils.get_default_gateway()
             target = "http://%s:%d/receive" % (
                 gateway,
-                _default_client_port,
-                guid
+                _default_client_port
             )
             transferrer = gssa.transferrer.transferrer_register['http']()
 
