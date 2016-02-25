@@ -41,6 +41,11 @@ class GoSmartSimulationServerSession(ApplicationSession):
         )
         ApplicationSession.__init__(self, x)
 
+    # com.gosmartsimulation.search - check for matching definitions
+    @asyncio.coroutine
+    def doSearch(self, guid):
+        return self._component.doSearch(guid)
+
     # com.gosmartsimulation.init - dummy call for the moment
     @asyncio.coroutine
     def doInit(self, guid):

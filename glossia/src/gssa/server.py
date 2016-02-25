@@ -111,7 +111,7 @@ class GoSmartSimulationServerComponent(object):
 
     # Retrieve a definition, if not from the current set, from persistent storage
     @asyncio.coroutine
-    def _fetch_definition(self, guid):
+    def _fetch_definition(self, guid, allow_many=False):
         guid = guid.upper()
 
         if guid in self.current:
@@ -119,9 +119,10 @@ class GoSmartSimulationServerComponent(object):
 
         guids = []
         if len(guid) < 32:
-            guids = set([g for g in self.current if g.startswith(guid)])
+            guids = {k: v for k, v in self.current.items() if k.startswith(guid)}
             if len(guids) > 1:
-                raise RuntimeError("More than one matching GUID")
+                if not allow_many:
+                    raise RuntimeError("More than one matching GUID")
 
         fut = asyncio.Future()
         loop = asyncio.get_event_loop()
@@ -131,25 +132,42 @@ class GoSmartSimulationServerComponent(object):
         definition = yield from fut
 
         if len(guid) < 32:
-            guids |= set(definition.keys())
+            definition.update(guids)
 
-            if len(guids) > 1:
-                raise RuntimeError("More than one matching GUID")
-            elif not guids:
+            if len(definition) > 1:
+                if allow_many:
+                    return definition
+                else:
+                    raise RuntimeError("More than one matching GUID")
+            elif not definition:
                 return guid, False
 
             short_guid = guid
-            guid = guids.pop()
+            guid, current = definition.items()[0]
             logger.info("Matched {short_guid} to {guid}".format(short_guid=short_guid, guid=guid))
 
             if guid not in self.current:
-                self.current[guid] = definition[guid]
+                self.current[guid] = current
         elif definition:
             self.current[guid] = definition
         else:
             return guid, False
 
         return guid, self.current[guid]
+
+    # com.gosmartsimulation.search - check for matching definitions
+    @asyncio.coroutine
+    def doSearch(self, guid):
+        definitions = yield from self._fetch_definition(guid, allow_many=True)
+
+        # If one or zero results are available, they are returned as a GUID/def pair
+        if isinstance(definitions, tuple):
+            if definitions[1]:
+                definitions = {definitions[0]: definitions[1]}
+            else:
+                return {}
+
+        return definitions
 
     # For start-up, mark everything in-progress in the DB as not-in-progress/unfinished
     def setDatabase(self, database):
