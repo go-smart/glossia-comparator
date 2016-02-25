@@ -554,7 +554,6 @@ class GoSmartSimulationServerComponent(object):
     # timestamp argument?
     def onRequestAnnounce(self):
         # Go through /every/ simulation
-        return 1
         simulations = self._db.all()
         for simulation in simulations:
             exit_code = simulation['exit_code']
