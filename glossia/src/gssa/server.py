@@ -23,6 +23,7 @@ import os
 import socket
 import multiprocessing
 import logging
+import functools
 import tempfile
 import time
 from . import family as families
@@ -47,6 +48,10 @@ from gssa.error import Error, makeError
 from gssa.config import etc_location
 import gssa.utils
 
+
+def _threadsafe_call(function, *args, **kwargs):
+    loop = asyncio.get_event_loop()
+    loop.call_soon_threadsafe(functools.partial(function, *args, **kwargs))
 
 # FIXME: 18103 should be made configurable
 _default_client_port = 18103
@@ -85,9 +90,6 @@ class GoSmartSimulationServerComponent(object):
             self.client = StatsCore.attachOrCreateStatsDaemon(transport, pid=lock, sock=sock)
             self.client.postWatchPid('go-smart-simulation-server', os.getpid())
 
-        # Convert this to a zope interface
-        loop = asyncio.get_event_loop()
-
         # Create a directory to hold information specific to this server ID
         if not os.path.exists(server_id):
             logger.debug("Creating server ID directory")
@@ -108,7 +110,7 @@ class GoSmartSimulationServerComponent(object):
         logger.debug("Requesting DB setup")
 
         # Flag this up to be done, but don't wait for it
-        loop.call_soon_threadsafe(lambda: self.setDatabase(database()))
+        _threadsafe_call(self.setDatabase, database())
 
     # Retrieve a definition, if not from the current set, from persistent storage
     @asyncio.coroutine
@@ -126,9 +128,8 @@ class GoSmartSimulationServerComponent(object):
                     raise RuntimeError("More than one matching GUID")
 
         fut = asyncio.Future()
-        loop = asyncio.get_event_loop()
 
-        loop.call_soon_threadsafe(lambda: fut.set_result(self._db.retrieve(guid)))
+        _threadsafe_call(lambda: fut.set_result(self._db.retrieve(guid)))
 
         definition = yield from fut
 
@@ -221,7 +222,7 @@ class GoSmartSimulationServerComponent(object):
         except AttributeError:
             task = asyncio.async(coro, loop=loop)
 
-        task.add_done_callback(lambda f: loop.call_soon_threadsafe(lambda: self._db.updateValidation(guid, f.result())))
+        task.add_done_callback(lambda f: _threadsafe_call(self._db.updateValidation, guid, f.result()))
 
         return True
 
@@ -482,8 +483,7 @@ class GoSmartSimulationServerComponent(object):
         logger.debug(timestamp)
         try:
             # Tell the database we have finished
-            loop = asyncio.get_event_loop()
-            loop.call_soon_threadsafe(lambda: self.setStatus(guid, "SUCCESS", "Success", "100", timestamp))
+            _threadsafe_call(self.setStatus, guid, "SUCCESS", "Success", "100", timestamp)
             # Run validation (if req)
             validation = None
             # validation = yield from self.current[guid].validation()
@@ -510,9 +510,8 @@ class GoSmartSimulationServerComponent(object):
         timestamp = time.time()
 
         try:
-            loop = asyncio.get_event_loop()
             # Update the database
-            loop.call_soon_threadsafe(lambda: self.setStatus(guid, message["code"], message["message"], None, timestamp))
+            _threadsafe_call(self.setStatus, guid, message["code"], message["message"], None, timestamp)
         except:
             logger.exception("Problem saving failure status")
 
@@ -612,8 +611,7 @@ class GoSmartSimulationServerComponent(object):
 
         try:
             # Call the setStatus method asynchronously
-            loop = asyncio.get_event_loop()
-            loop.call_soon_threadsafe(lambda: self.setStatus(guid, 'IN_PROGRESS', message, percentage, timestamp))
+            _threadsafe_call(self.setStatus, guid, 'IN_PROGRESS', message, percentage, timestamp)
         except:
             logger.exception("Problem saving status")
 
