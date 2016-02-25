@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import shutil
+import sys
 import tarfile
 import logging
 
@@ -226,20 +227,6 @@ class GoSmartSimulationDefinition:
 
         return True
 
-    # Create a results archive
-    def gather_results(self):
-        output_directory = os.path.join(self.get_dir(), 'output')
-        output_final_directory = os.path.join(self.get_dir(), 'output.final')
-
-        result_files = {
-            'output': output_directory,
-            'output.final': output_final_directory,
-            'original.xml': os.path.join(self.get_dir(), 'original.xml'),
-            'guid': os.path.join(self.get_dir(), 'guid'),
-        }
-
-        return self._gather_files('results_archive.tgz', result_files)
-
     # Create a diagnostic archive
     def gather_diagnostic(self):
         input_directory = os.path.join(self.get_dir(), 'input')
@@ -247,30 +234,24 @@ class GoSmartSimulationDefinition:
         output_directory = os.path.join(self.get_dir(), 'output')
         log_directory = os.path.join(output_directory, 'logs')
 
+        os.makedirs(output_directory, exist_ok=True)
+
+        diagnostic_archive = os.path.join(output_directory, 'diagnostic_archive.tgz')
+        missing_file = os.path.join(output_directory, 'diagnostic_missing.txt')
+
         diagnostic_files = {
             'input': input_directory,
             'input.final': input_final_directory,
             'logs': log_directory,
-            'original.xml': os.path.join(self.get_dir(), 'original.xml'),
-            'guid': os.path.join(self.get_dir(), 'guid'),
+            'original.xml': os.path.join(output_directory, 'original.xml'),
+            'guid': os.path.join(output_directory, 'guid'),
         }
-
-        return self._gather_files('diagnostic_archive.tgz', diagnostic_files)
-
-    # Turn a list of files into an archive
-    def _gather_files(self, archive_name, files):
-        output_directory = os.path.join(self.get_dir(), 'output')
-        missing_file = os.path.join(output_directory, 'missing.txt')
-
-        os.makedirs(output_directory, exist_ok=True)
 
         logger.debug("Creating tarfile")
 
-        archive = os.path.join(output_directory, archive_name)
-
-        with tarfile.open(archive, mode='w:gz') as definition_tar:
+        with tarfile.open(diagnostic_archive, mode='w:gz') as definition_tar:
             with open(missing_file, 'w') as missing:
-                for f, loc in files.items():
+                for f, loc in diagnostic_files.items():
                     try:
                         definition_tar.add(loc, arcname='%s/%s' % (self._guid, f))
                     except Exception as e:
@@ -279,7 +260,7 @@ class GoSmartSimulationDefinition:
 
         logger.debug("Created tarfile")
 
-        return archive
+        return diagnostic_archive
 
     # Send back the results
     def push_files(self, files):

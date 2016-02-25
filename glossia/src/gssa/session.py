@@ -41,6 +41,11 @@ class GoSmartSimulationServerSession(ApplicationSession):
         )
         ApplicationSession.__init__(self, x)
 
+    # com.gosmartsimulation.search - check for matching definitions
+    @asyncio.coroutine
+    def doSearch(self, guid):
+        return self._component.doSearch(guid)
+
     # com.gosmartsimulation.init - dummy call for the moment
     @asyncio.coroutine
     def doInit(self, guid):
@@ -142,13 +147,14 @@ class GoSmartSimulationServerSession(ApplicationSession):
                 self.subscribe(self.onRequestAnnounce, u'com.gosmartsimulation%s.request_announce' % i)
                 self.subscribe(self.onRequestIdentify, u'com.gosmartsimulation%s.request_identify' % i)
 
+                self.register(self.doSearch, u'com.gosmartsimulation%s.search' % i)
                 self.register(self.doInit, u'com.gosmartsimulation%s.init' % i)
                 self.register(self.doStart, u'com.gosmartsimulation%s.start' % i)
                 self.register(self.doUpdateSettingsXml, u'com.gosmartsimulation%s.update_settings_xml' % i)
                 self.register(self.doUpdateFiles, u'com.gosmartsimulation%s.update_files' % i)
                 self.register(self.doRequestFiles, u'com.gosmartsimulation%s.request_files' % i)
                 self.register(self.doRequestDiagnostic, u'com.gosmartsimulation%s.request_diagnostic' % i)
-                self.register(self.doRequestDiagnostic, u'com.gosmartsimulation%s.request_results' % i)
+                self.register(self.doRequestResults, u'com.gosmartsimulation%s.request_results' % i)
                 self.register(self.doTmpValidation, u'com.gosmartsimulation%s.tmp_validation' % i)
                 self.register(self.doFinalize, u'com.gosmartsimulation%s.finalize' % i)
                 self.register(self.doClean, u'com.gosmartsimulation%s.clean' % i)

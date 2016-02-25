@@ -149,17 +149,47 @@ class SQLiteSimulationDatabase:
         simulations = cursor.fetchall()
         return simulations
 
+    def search(self, guid_start):
+        cursor = self._db.cursor()
+        guid = str(guid_start) + '%'
+        cursor.execute('''
+            SELECT *
+            FROM simulations
+            WHERE guid LIKE :guid AND deleted=0
+        ''', {'guid': guid})
+        try:
+            simulation_rows = cursor.fetchall()
+        except Exception:
+            return None
+
+        # Simulations should not be added to the database until they are finalized
+        def buildsim(s):
+            d = GoSmartSimulationDefinition(s['guid'], None, s['directory'], None, finalized=True)
+            d._status = {'percentage': s['percentage'], 'message': s['status'], 'timestamp': s['timestamp']}
+            d.set_exit_status(s['exit_code'], s['status'])
+            return d
+
+        simulations = {s['guid']: buildsim(s) for s in simulation_rows if os.path.exists(s['directory'])}
+
+        return simulations
+
     # Get a simulation by the client's GUID
     def retrieve(self, guid):
+        if len(guid) < 32:
+            return self.search(guid)
+
         cursor = self._db.cursor()
         cursor.execute('''
             SELECT *
             FROM simulations
-            WHERE guid=? AND deleted=0
-        ''', guid)
+            WHERE guid=:guid AND deleted=0
+        ''', {'guid': guid})
         try:
             simulation_row = cursor.fetchone()
         except Exception:
+            return None
+
+        if not simulation_row:
             return None
 
         directory = simulation_row['directory']
@@ -168,7 +198,7 @@ class SQLiteSimulationDatabase:
             return None
 
         # Simulations should not be added to the database until they are finalized
-        return GoSmartSimulationDefinition(guid, directory, finalized=True)
+        return GoSmartSimulationDefinition(guid, None, directory, None, finalized=True)
 
     def delete(self, simulation, soft=True):
         cursor = self._db.cursor()
