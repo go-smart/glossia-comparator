@@ -380,6 +380,8 @@ class GoSmartSimulationServerComponent(object):
     # simulation
     @asyncio.coroutine
     def doUpdateSettingsXml(self, guid, xml):
+        guid = guid.upper()
+
         try:
             # Create a working directory for the simulation (this is needed even
             # if the tool runs elsewhere, as in the Docker case)
