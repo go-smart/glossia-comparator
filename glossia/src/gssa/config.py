@@ -29,6 +29,7 @@ etc_location = gosmart_sf_config.etc_location
 
 __config = None
 __config_file = None
+__api_version = 'A0.1'
 
 
 def init_logger(name):
@@ -70,3 +71,7 @@ def get(key, default=None):
 
 def get_config_file():
     return __config_file
+
+
+def get_api_version():
+    return __api_version
