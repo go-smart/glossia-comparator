@@ -159,7 +159,7 @@ class GoSmartSimulationServerComponent(object):
 
     # com.gosmartsimulation.search - check for matching definitions
     @asyncio.coroutine
-    def doSearch(self, guid):
+    def doSearch(self, guid, limit=None):
         definitions = yield from self._fetch_definition(guid, allow_many=True)
         logging.info('Searching for %s' % guid)
 
@@ -172,6 +172,12 @@ class GoSmartSimulationServerComponent(object):
                 return {}
 
         definitions = {k: d.summary() for k, d in definitions.items()}
+
+        # Reduce total number of definitions to a manageable level, if requested
+        # Note this is an arbitrary selection
+        if limit:
+            key_subset = list(definitions.keys())[:limit]
+            definitions = {k: definitions[k] for k in key_subset}
 
         logging.info('Found %d matches' % len(definitions))
         return definitions
