@@ -193,6 +193,7 @@ class GoSmartSimulationServerComponent(object):
     def doClean(self, guid):
         guid, current = yield from self._fetch_definition(guid)
         if not current:
+            logger.warning("Definition %s not found" % guid)
             return False
 
         result = yield from current.clean()
@@ -204,6 +205,7 @@ class GoSmartSimulationServerComponent(object):
     def doStart(self, guid):
         guid, current = yield from self._fetch_definition(guid)
         if not current:
+            logger.warning("Definition %s not found" % guid)
             return False
 
         loop = asyncio.get_event_loop()
@@ -237,6 +239,7 @@ class GoSmartSimulationServerComponent(object):
 
         guid, current = yield from self._fetch_definition(guid)
         if not current:
+            logger.warning("Definition %s not found" % guid)
             return False
 
         if success:
@@ -299,7 +302,7 @@ class GoSmartSimulationServerComponent(object):
     def doRequestResults(self, guid, target):
         guid, current = yield from self._fetch_definition(guid)
         if not current:
-            logger.info("Simulation [%s] not found" % guid)
+            logger.warning("Simulation [%s] not found" % guid)
             return {}
 
         logger.info("Result bundle requested for [%s]" % guid)
@@ -328,7 +331,7 @@ class GoSmartSimulationServerComponent(object):
     def doRequestDiagnostic(self, guid, target):
         guid, current = yield from self._fetch_definition(guid)
         if not current:
-            logger.info("Simulation [%s] not found" % guid)
+            logger.warning("Simulation [%s] not found" % guid)
             return {}
 
         logger.info("Diagnostic bundle requested for [%s]" % guid)
@@ -442,6 +445,7 @@ class GoSmartSimulationServerComponent(object):
         logger.debug("Converting the Xml")
         guid, current = yield from self._fetch_definition(guid)
         if not current:
+            logger.warning("Simulation [%s] not found" % guid)
             return False
 
         current.set_remote_dir(client_directory_prefix)
@@ -619,6 +623,8 @@ class GoSmartSimulationServerComponent(object):
         guid, current = yield from self._fetch_definition(guid)
         if current:
             directory = current.get_dir()
+        else:
+            logger.warning("Simulation [%s] not found" % guid)
 
         # Publish a status update for the WAMP clients to see
         self.publish('com.gosmartsimulation.status', guid, (percentage, makeError('IN_PROGRESS', message)), directory, timestamp, None)
