@@ -30,7 +30,7 @@ from zope.interface.verify import verifyObject
 from .transferrer import ITransferrer
 from . import family as families
 
-from lxml import etree as ET
+import lxml.etree
 
 
 # Routines for working with a single specific simulation
@@ -160,7 +160,7 @@ class GoSmartSimulationDefinition:
         self._finalized = False
 
         try:
-            self._xml = ET.fromstring(bytes(xml, 'utf-8'))
+            self._xml = lxml.etree.fromstring(bytes(xml, 'utf-8'))
         except Exception as e:
             logger.exception('Could not create XML from input')
             raise e
