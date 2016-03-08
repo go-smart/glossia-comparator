@@ -61,6 +61,12 @@ class GoSmartSimulationServerComponent(object):
     current = None
     client = None
     _db = None
+    
+    def _write_identity(self, identity):
+        # Provide a directory-internal way to find out our ID (i.e. without
+        # looking at the name in the directory above)
+        with open("identity", "w") as f:
+            f.write(identity)
 
     def __init__(self, server_id, database, publish_cb, ignore_development=False, use_observant=use_observant):
         # This forwards exceptions to the client
@@ -101,10 +107,7 @@ class GoSmartSimulationServerComponent(object):
 
         logger.debug("Storing identity (%s)" % server_id)
 
-        # Provide a directory-internal way to find out our ID (i.e. without
-        # looking at the name in the directory above)
-        with open("identity", "w") as f:
-            f.write(server_id)
+        self._write_identity(server_id)
 
         logger.debug("Requesting DB setup")
 
