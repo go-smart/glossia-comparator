@@ -1,4 +1,4 @@
 dockerlaunch:
-    socket_location: "/var/run/docker-launch/docker-launch.sock"
+    socket_location: "/var/run/dockerlaunch/dockerlaunch.sock"
 logging:
     txaio: false

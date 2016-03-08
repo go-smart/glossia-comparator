@@ -14,7 +14,7 @@ from hachiko.hachiko import AIOEventHandler
 
 from . import config
 
-default_dockerlaunch_socket_location = '/var/run/docker-launch/docker-launch.sock'
+default_dockerlaunch_socket_location = '/var/run/dockerlaunch/dockerlaunch.sock'
 
 
 # Check for output in the Docker volume
