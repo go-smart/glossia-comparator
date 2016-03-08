@@ -300,16 +300,18 @@ class MesherGSSFMixin:
         # Make sure all needles are int-castable, or, if not,
         # just make up our own ordering
         try:
-            for ix in self._needles:
-                int(ix.replace('needle', ''))
+            needle_indices = [int(ix.replace('needle', '')) for ix in self._needles]
         except ValueError:
             self._needles = {str(i + 1): v for i, v in enumerate(self._needles.values())}
+        augment = (0 in needle_indices)
 
         for ix, needle in self._needles.items():
             # Add a needle node and set the name to be our index (if we have
             # been given, say, 'needle-3' as an index, it becomes '3')
             globalNeedleNode = ET.SubElement(globalNeedlesNode, "needle")
             l = int(ix.replace('needle', ''))
+            if augment:
+                l += 1
             globalNeedleNode.set("name", str(l))
 
             # If this needle is a boundary type (the only type for the

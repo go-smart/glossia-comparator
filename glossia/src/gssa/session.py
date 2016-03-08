@@ -43,13 +43,20 @@ class GoSmartSimulationServerSession(ApplicationSession):
 
     # com.gosmartsimulation.search - check for matching definitions
     @asyncio.coroutine
-    def doSearch(self, guid):
-        return self._component.doSearch(guid)
+    def doSearch(self, guid, limit=None):
+        return self._component.doSearch(guid, limit)
 
     # com.gosmartsimulation.init - dummy call for the moment
     @asyncio.coroutine
     def doInit(self, guid):
         return self._component.doInit(guid)
+
+    # com.gosmartsimulation.api - find the current API version in use
+    # The API version only needs to be bumped when backward-incompatible changes
+    # occur on either side
+    @asyncio.coroutine
+    def doApi(self):
+        return self._component.doApi()
 
     # com.gosmartsimulation.clean - remove anything in simulation working
     # directory, for instance
@@ -161,6 +168,7 @@ class GoSmartSimulationServerSession(ApplicationSession):
                 self.register(self.doCompare, u'com.gosmartsimulation%s.compare' % i)
                 self.register(self.doProperties, u'com.gosmartsimulation%s.properties' % i)
                 self.register(self.doRetrieveStatus, u'com.gosmartsimulation%s.retrieve_status' % i)
+                self.register(self.doApi, u'com.gosmartsimulation%s.api' % i)
             logger.info("procedure registered")
         except Exception as e:
             logger.warning("could not register procedure: {0}".format(e))

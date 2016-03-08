@@ -44,8 +44,7 @@ import gssa.comparator
 import gssa.definition
 import gssa.translator
 import gssa.error
-from gssa.error import Error, makeError
-from gssa.config import etc_location
+import gssa.config
 import gssa.utils
 
 
@@ -83,7 +82,7 @@ class GoSmartSimulationServerComponent(object):
         # If we are using vigilant, do the relevant set-up
         if use_observant:
             config = CParser()
-            config.read(os.path.join(etc_location, 'vigilant.cfg'))
+            config.read(os.path.join(gssa.config.etc_location, 'vigilant.cfg'))
 
             lock = str(config.get('daemon', 'lock'))
             sock = str(config.get('daemon', 'sock'))
@@ -162,7 +161,7 @@ class GoSmartSimulationServerComponent(object):
 
     # com.gosmartsimulation.search - check for matching definitions
     @asyncio.coroutine
-    def doSearch(self, guid):
+    def doSearch(self, guid, limit=None):
         definitions = yield from self._fetch_definition(guid, allow_many=True)
         logging.info('Searching for %s' % guid)
 
@@ -176,8 +175,21 @@ class GoSmartSimulationServerComponent(object):
 
         definitions = {k: d.summary() for k, d in definitions.items()}
 
+        # Reduce total number of definitions to a manageable level, if requested
+        # Note this is an arbitrary selection
+        if limit:
+            key_subset = list(definitions.keys())[:limit]
+            definitions = {k: definitions[k] for k in key_subset}
+
         logging.info('Found %d matches' % len(definitions))
         return definitions
+
+    # com.gosmartsimulation.api - find the current API version in use
+    # The API version only needs to be bumped when backward-incompatible changes
+    # occur on either side
+    @asyncio.coroutine
+    def doApi(self):
+        return gssa.config.get_api_version()
 
     # For start-up, mark everything in-progress in the DB as not-in-progress/unfinished
     def setDatabase(self, database):
@@ -196,6 +208,7 @@ class GoSmartSimulationServerComponent(object):
     def doClean(self, guid):
         guid, current = yield from self._fetch_definition(guid)
         if not current:
+            logger.warning("Definition %s not found" % guid)
             return False
 
         result = yield from current.clean()
@@ -207,6 +220,7 @@ class GoSmartSimulationServerComponent(object):
     def doStart(self, guid):
         guid, current = yield from self._fetch_definition(guid)
         if not current:
+            logger.warning("Definition %s not found" % guid)
             return False
 
         loop = asyncio.get_event_loop()
@@ -240,6 +254,7 @@ class GoSmartSimulationServerComponent(object):
 
         guid, current = yield from self._fetch_definition(guid)
         if not current:
+            logger.warning("Definition %s not found" % guid)
             return False
 
         if success:
@@ -249,7 +264,7 @@ class GoSmartSimulationServerComponent(object):
             pass
         else:
             # We know this did not succeed, but not why it failed
-            code = Error.E_UNKNOWN
+            code = gssa.error.Error.E_UNKNOWN
             error_message = "Unknown error occurred"
 
             # In theory, an error message should have been written here, in any
@@ -264,7 +279,7 @@ class GoSmartSimulationServerComponent(object):
                     error_message.encode('utf-8')
 
             logger.warning("Failed simulation in %s" % current.get_dir())
-            yield from self.eventFail(guid, makeError(code, error_message))
+            yield from self.eventFail(guid, gssa.error.makeError(code, error_message))
 
         logger.info("Finished simulation")
 
@@ -302,7 +317,7 @@ class GoSmartSimulationServerComponent(object):
     def doRequestResults(self, guid, target):
         guid, current = yield from self._fetch_definition(guid)
         if not current:
-            logger.info("Simulation [%s] not found" % guid)
+            logger.warning("Simulation [%s] not found" % guid)
             return {}
 
         logger.info("Result bundle requested for [%s]" % guid)
@@ -331,7 +346,7 @@ class GoSmartSimulationServerComponent(object):
     def doRequestDiagnostic(self, guid, target):
         guid, current = yield from self._fetch_definition(guid)
         if not current:
-            logger.info("Simulation [%s] not found" % guid)
+            logger.warning("Simulation [%s] not found" % guid)
             return {}
 
         logger.info("Diagnostic bundle requested for [%s]" % guid)
@@ -380,6 +395,8 @@ class GoSmartSimulationServerComponent(object):
     # simulation
     @asyncio.coroutine
     def doUpdateSettingsXml(self, guid, xml):
+        guid = guid.upper()
+
         try:
             # Create a working directory for the simulation (this is needed even
             # if the tool runs elsewhere, as in the Docker case)
@@ -416,7 +433,7 @@ class GoSmartSimulationServerComponent(object):
     def doSimulate(self, guid):
         guid, current = yield from self._fetch_definition(guid)
         if not current:
-            yield from self.eventFail(guid, makeError(Error.E_CLIENT, "Not fully prepared before launching - no current simulation set"))
+            yield from self.eventFail(guid, gssa.error.makeError(gssa.error.Error.E_CLIENT, "Not fully prepared before launching - no current simulation set"))
             success = None
 
         logger.debug("Running simulation in %s" % current.get_dir())
@@ -433,7 +450,7 @@ class GoSmartSimulationServerComponent(object):
             success = yield from current.simulate()
         except Exception as e:
             logger.exception("Simulation failed! {exc}".format(exc=e))
-            yield from self.eventFail(guid, makeError(Error.E_SERVER, "[%s] %s" % (type(e), str(e))))
+            yield from self.eventFail(guid, gssa.error.makeError(gssa.error.Error.E_SERVER, "[%s] %s" % (type(e), str(e))))
             success = None
 
         return success
@@ -445,6 +462,7 @@ class GoSmartSimulationServerComponent(object):
         logger.debug("Converting the Xml")
         guid, current = yield from self._fetch_definition(guid)
         if not current:
+            logger.warning("Simulation [%s] not found" % guid)
             return False
 
         current.set_remote_dir(client_directory_prefix)
@@ -501,7 +519,7 @@ class GoSmartSimulationServerComponent(object):
         logger.info('Success [%s]' % guid)
 
         # Notify any subscribers
-        self.publish(u'com.gosmartsimulation.complete', guid, makeError('SUCCESS', 'Success'), current.get_dir(), timestamp, validation)
+        self.publish(u'com.gosmartsimulation.complete', guid, gssa.error.makeError('SUCCESS', 'Success'), current.get_dir(), timestamp, validation)
 
     # Called when simulation fails - publishes a failure event
     @asyncio.coroutine
@@ -622,9 +640,11 @@ class GoSmartSimulationServerComponent(object):
         guid, current = yield from self._fetch_definition(guid)
         if current:
             directory = current.get_dir()
+        else:
+            logger.warning("Simulation [%s] not found" % guid)
 
         # Publish a status update for the WAMP clients to see
-        self.publish('com.gosmartsimulation.status', guid, (percentage, makeError('IN_PROGRESS', message)), directory, timestamp, None)
+        self.publish('com.gosmartsimulation.status', guid, (percentage, gssa.error.makeError('IN_PROGRESS', message)), directory, timestamp, None)
 
     # com.gosmartsimulation.request_identify - publish basic server information
     def onRequestIdentify(self):
