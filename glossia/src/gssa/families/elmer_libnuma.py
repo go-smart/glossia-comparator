@@ -63,7 +63,7 @@ class ElmerLibNumaFamily(DockerFamily, MesherGSSFMixin):
         self._needle_order = {}
         self._files_required = files_required
         self._args = GoSmartSimulationFrameworkArguments(configfilenames=["settings.xml"])
-        self._retrievable_files += ['lesion_surface.vtp', 'output.vtu']
+        self._retrievable_files += ['lesion_surface.vtp', 'output.vtu', 'lesion_volume.vtu']
 
         super().__init__(files_required, *args, **kwargs)
 
