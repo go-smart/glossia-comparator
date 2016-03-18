@@ -81,6 +81,12 @@ class GoSmartSimulationServerSession(ApplicationSession):
     def doUpdateFiles(self, guid, files):
         return self._component.doUpdateFiles(guid, files)
 
+    # com.gosmartsimulation.cancel - prematurely stop a running simulation
+    # bear in mind that no request for confirmation exists!
+    @asyncio.coroutine
+    def doCancel(self, guid):
+        return self._component.doCancel(guid)
+
     # com.gosmartsimulation.request_files - push the requested output files
     # through the transferrer and return the list that was sent
     @asyncio.coroutine
@@ -159,6 +165,7 @@ class GoSmartSimulationServerSession(ApplicationSession):
                 self.register(self.doStart, u'com.gosmartsimulation%s.start' % i)
                 self.register(self.doUpdateSettingsXml, u'com.gosmartsimulation%s.update_settings_xml' % i)
                 self.register(self.doUpdateFiles, u'com.gosmartsimulation%s.update_files' % i)
+                self.register(self.doCancel, u'com.gosmartsimulation%s.cancel' % i)
                 self.register(self.doRequestFiles, u'com.gosmartsimulation%s.request_files' % i)
                 self.register(self.doRequestDiagnostic, u'com.gosmartsimulation%s.request_diagnostic' % i)
                 self.register(self.doRequestResults, u'com.gosmartsimulation%s.request_results' % i)

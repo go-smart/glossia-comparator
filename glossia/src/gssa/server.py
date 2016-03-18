@@ -61,7 +61,7 @@ class GoSmartSimulationServerComponent(object):
     current = None
     client = None
     _db = None
-    
+
     def _write_identity(self, identity):
         # Provide a directory-internal way to find out our ID (i.e. without
         # looking at the name in the directory above)
@@ -114,13 +114,21 @@ class GoSmartSimulationServerComponent(object):
         # Flag this up to be done, but don't wait for it
         _threadsafe_call(self.setDatabase, database())
 
-    # Retrieve a definition, if not from the current set, from persistent storage
+    # Retrieve a definition, if not from the current set, from persistent storage.
+    # If resync is True then update the DB if it is inconsistent; set to False
+    # by default to avoid unnecessary DB hits.
     @asyncio.coroutine
-    def _fetch_definition(self, guid, allow_many=False):
+    def _fetch_definition(self, guid, allow_many=False, resync=False):
         guid = guid.upper()
 
+        # We only resync DB if there is a full-length GUID match
+        live_current = None
+
         if guid in self.current:
-            return guid, self.current[guid]
+            if resync:
+                live_current = self.current[guid]
+            else:
+                return guid, self.current[guid]
 
         guids = []
         if len(guid) < 32:
@@ -153,11 +161,31 @@ class GoSmartSimulationServerComponent(object):
             if guid not in self.current:
                 self.current[guid] = current
         elif definition:
-            self.current[guid] = definition
+            if live_current:
+                self._resync(live_current, definition)
+            else:
+                self.current[guid] = definition
         else:
             return guid, False
 
         return guid, self.current[guid]
+
+    # Update the database based on the status of the live entry
+    @asyncio.coroutine
+    def _resync(self, live_definition, db_definition):
+        live_summary = live_definition.summary()
+        db_summary = db_definition.summary()
+        if live_summary != db_summary:
+            logger.warning("Definitions do not match!\n%s\n%s\n(updating)" % (live_summary, db_summary))
+            _threadsafe_call(self.addOrUpdate, live_definition)
+            _threadsafe_call(
+                self.setStatus,
+                live_summary['guid'],
+                live_summary['exit_status'],
+                live_summary['status']['message'],
+                live_summary['status']['percentage'],
+                live_summary['status']['timestamp']
+            )
 
     # com.gosmartsimulation.search - check for matching definitions
     @asyncio.coroutine
@@ -206,7 +234,7 @@ class GoSmartSimulationServerComponent(object):
     # directory, for instance
     @asyncio.coroutine
     def doClean(self, guid):
-        guid, current = yield from self._fetch_definition(guid)
+        guid, current = yield from self._fetch_definition(guid, resync=True)
         if not current:
             logger.warning("Definition %s not found" % guid)
             return False
@@ -297,6 +325,16 @@ class GoSmartSimulationServerComponent(object):
             logger.debug("remote" + remote)
             logger.debug("Local" + local)
         current.update_files(files)
+
+        return True
+
+    # com.gosmartsimulation.cancel - prematurely stop the running simulation
+    @asyncio.coroutine
+    def doCancel(self, guid):
+        guid, current = yield from self._fetch_definition(guid)
+        if not current:
+            logger.warning("Simulation [%s] not found" % guid)
+            return False
 
         return True
 
@@ -544,12 +582,21 @@ class GoSmartSimulationServerComponent(object):
         self.publish(u'com.gosmartsimulation.fail', guid, message, current.get_dir(), timestamp, None)
 
     # com.gosmartsimulation.retrieve_status - get the latest status for a
-    # simulation
+    # simulation. allow_resync permits the server to update the DB if it finds
+    # an inconsistency.
     @asyncio.coroutine
-    def doRetrieveStatus(self, guid):
+    def doRetrieveStatus(self, guid, allow_resync=True):
         # Get this from the DB, not current, as the DB should give a consistent
         # answer even after restart (unless marked unfinished)
-        simulation = self._db.retrieve(guid)
+        if allow_resync:
+            guid, simulation = yield from self._fetch_definition(guid, resync=True)
+        else:
+            simulation = self._db.retrieve(guid)
+
+        if not simulation:
+            logger.error('Simulation not found')
+            return None
+
         exit_code = simulation['exit_code']
 
         if exit_code is None:
@@ -608,17 +655,21 @@ class GoSmartSimulationServerComponent(object):
         # Write this message to the database
         self._db.setStatus(id, key, message, percentage, timestamp)
 
-        # Write the last message in a format that the status can be easily
-        # re-read
-        with open(os.path.join(self.current[id].get_dir(), 'last_message'), 'w') as f:
-            f.write("%s\n" % id)
-            f.write("%s\n" % key.strip())
-            if percentage:
-                f.write("%lf\n" % float(percentage))
-            else:
-                f.write("\n")
-            if message:
-                f.write(message.strip())
+        try:
+            # Write the last message in a format that the status can be easily
+            # re-read
+            with open(os.path.join(self.current[id].get_dir(), 'last_message'), 'w') as f:
+                f.write("%s\n" % id)
+                f.write("%s\n" % key.strip())
+                if percentage:
+                    f.write("%lf\n" % float(percentage))
+                else:
+                    f.write("\n")
+                if message:
+                    f.write(message.strip())
+        except OSError:
+            # This may because the simulation was from a previous server process
+            logger.warning("Tried to update simulation status on filesystem but simulation gone.")
 
     # Update the status, setting up a callback for asyncio
     @asyncio.coroutine

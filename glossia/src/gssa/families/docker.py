@@ -141,3 +141,8 @@ class DockerFamily(Family):
         for f in self._retrievable_files:
             logging.debug("{fm} -> {to}".format(fm=f, to=destination))
             logging.debug(self._submitter.copy_output(f, destination))
+
+    @asyncio.coroutine
+    def cancel(self):
+        success = yield from self._submitter.cancel()
+        return success

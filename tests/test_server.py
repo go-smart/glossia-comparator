@@ -43,6 +43,7 @@ def gsssc(definition, monkeypatch, event_loop):
     database = MagicMock()
     publish_cb = MagicMock()
     use_observant = False
+    ignore_development = True
 
     mkdir = MagicMock()
     monkeypatch.setattr("os.mkdir", mkdir)
@@ -57,6 +58,7 @@ def gsssc(definition, monkeypatch, event_loop):
         server_id,
         database,
         publish_cb,
+        ignore_development,
         use_observant
     )
 
@@ -503,16 +505,3 @@ def test_eventFail ( gsssc , monkeypatch , definition ) :
     yield from wait()
     random_current.assert_called_with ( random_guid )
     # is event fail a mock ???
-
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-

@@ -159,6 +159,10 @@ class Family(metaclass=FamilyType):
     def validation(self, working_directory=None):
         return None
 
+    @asyncio.coroutine
+    def cancel(self):
+        return False
+
 from .families import scan
 
 # Scan for family classes

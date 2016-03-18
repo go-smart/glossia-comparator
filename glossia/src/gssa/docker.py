@@ -13,6 +13,7 @@ from watchdog.events import FileSystemEventHandler
 from hachiko.hachiko import AIOEventHandler
 
 from . import config
+import gssa.error
 
 default_dockerlaunch_socket_location = '/var/run/dockerlaunch/dockerlaunch.sock'
 
@@ -36,6 +37,8 @@ class OutputHandler(AIOEventHandler, FileSystemEventHandler):
 class Submitter:
     reader = None
     writer = None
+    _cancelled = False
+    _destroyed = False
     _socket_location = None
 
     def __init__(self):
@@ -246,7 +249,17 @@ class Submitter:
 
             # Get the simulation exit status
             exit_status = self.output(os.path.join('logs', 'exit_status'))
-            code, message = exit_status.split('\n', 1)
+
+            if exit_status:
+                code, message = exit_status.split('\n', 1)
+                if self._cancelled:
+                    message = "[Cancelled] " + message
+            elif self._cancelled:
+                code = gssa.error.Error.E_CANCELLED
+                message = "Cancelled at user request"
+            else:
+                code = gssa.error.Error.E_UNKNOWN
+                message = "Unknown error occurred (missing exit status)"
 
             # If we did not exit cleanly, inform the server
             if int(code) != 0:
@@ -274,7 +287,17 @@ class Submitter:
         return success
 
     @asyncio.coroutine
+    def cancel(self):
+        self._cancelled = True
+        yield from self.destroy()
+        return True
+
+    @asyncio.coroutine
     def destroy(self):
+        # destroy should be idempotent - that's fine.
+        if self._destroyed:
+            return
+
         if not self.reader or not self.writer:
             raise RuntimeError('No reader/writer members to access launcher daemon')
 
@@ -283,7 +306,9 @@ class Submitter:
         success, message = yield from self.receive_response(self.reader)
         logger.debug('<-- %s %s' % (str(success), str(message)))
 
-        if not success:
+        if success:
+            self._destroyed = True
+        else:
             raise RuntimeError('Could not destroy: %s', message)
 
     def finalize(self):
