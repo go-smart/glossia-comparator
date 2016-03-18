@@ -317,6 +317,11 @@ class GoSmartSimulationDefinition:
         return uploaded_files
 
     @asyncio.coroutine
+    def cancel(self):
+        success = yield from self._model_builder.cancel()
+        return success
+
+    @asyncio.coroutine
     def simulate(self):
         if self._shadowing:
             logger.warning("Not simulating: shadowing mode ON for this definition")
