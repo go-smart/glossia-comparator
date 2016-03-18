@@ -336,7 +336,11 @@ class GoSmartSimulationServerComponent(object):
             logger.warning("Simulation [%s] not found" % guid)
             return False
 
-        result = yield from current.cancel()
+        try:
+            result = yield from current.cancel()
+        except Exception as e:
+            logger.exception("Problem cancelling simulation")
+            raise e
 
         return result
 
