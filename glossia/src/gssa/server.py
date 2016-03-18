@@ -597,26 +597,28 @@ class GoSmartSimulationServerComponent(object):
             logger.error('Simulation not found')
             return None
 
-        exit_code = simulation['exit_code']
+        summary = simulation.summary()
+
+        exit_code = summary['exit_code']
 
         if exit_code is None:
-            if simulation['guid'] in self.current:
+            if summary['guid'] in self.current:
                 exit_code = 'IN_PROGRESS'
             else:
                 exit_code = 'E_UNKNOWN'
 
         # NB: makeError can return SUCCESS or IN_PROGRESS
-        status = gssa.error.makeError(exit_code, simulation['status'])
-        percentage = simulation['percentage']
+        status = gssa.error.makeError(exit_code, summary['status'])
+        percentage = summary['percentage']
 
         # This format matches the fail/status/complete events
         return {
             "server_id": self.server_id,
-            "simulation_id": simulation['guid'],
+            "summary_id": summary['guid'],
             "status": (percentage, status),
-            "directory": simulation['directory'],
-            "timestamp": simulation['timestamp'],
-            "validation": simulation['validation']
+            "directory": summary['directory'],
+            "timestamp": summary['timestamp'],
+            "validation": summary['validation']
         }
 
     # com.gosmartsimulation.request_announce - release a status report on each
