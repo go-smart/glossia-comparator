@@ -610,12 +610,12 @@ class GoSmartSimulationServerComponent(object):
 
             if exit_code is None:
                 if summary['guid'] in self.current:
-                    exit_code = 'IN_PROGRESS'
+                    exit_code = ('IN_PROGRESS', '...')
                 else:
-                    exit_code = 'E_UNKNOWN'
+                    exit_code = ('E_UNKNOWN', '...')
 
             # NB: makeError can return SUCCESS or IN_PROGRESS
-            status = gssa.error.makeError(exit_code, summary['status']['message'])
+            status = gssa.error.makeError(exit_code[0], summary['status']['message'])
             percentage = summary['status']['percentage']
             timestamp = summary['status']['timestamp']
 
@@ -623,6 +623,7 @@ class GoSmartSimulationServerComponent(object):
             return {
                 "server_id": self.server_id,
                 "summary_id": summary['guid'],
+                "exit_code": exit_code,
                 "status": (percentage, status, timestamp),
                 "directory": summary['directory']
             }
