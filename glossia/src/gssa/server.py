@@ -603,28 +603,32 @@ class GoSmartSimulationServerComponent(object):
             logger.error('Simulation not found')
             return None
 
-        summary = simulation.summary()
+        try:
+            summary = simulation.summary()
 
-        exit_code = summary['exit_status']
+            exit_code = summary['exit_status']
 
-        if exit_code is None:
-            if summary['guid'] in self.current:
-                exit_code = 'IN_PROGRESS'
-            else:
-                exit_code = 'E_UNKNOWN'
+            if exit_code is None:
+                if summary['guid'] in self.current:
+                    exit_code = 'IN_PROGRESS'
+                else:
+                    exit_code = 'E_UNKNOWN'
 
-        # NB: makeError can return SUCCESS or IN_PROGRESS
-        status = gssa.error.makeError(exit_code, summary['status']['message'])
-        percentage = summary['status']['percentage']
-        timestamp = summary['status']['timestamp']
+            # NB: makeError can return SUCCESS or IN_PROGRESS
+            status = gssa.error.makeError(exit_code, summary['status']['message'])
+            percentage = summary['status']['percentage']
+            timestamp = summary['status']['timestamp']
 
-        # This format matches the fail/status/complete events
-        return {
-            "server_id": self.server_id,
-            "summary_id": summary['guid'],
-            "status": (percentage, status, timestamp),
-            "directory": summary['directory']
-        }
+            # This format matches the fail/status/complete events
+            return {
+                "server_id": self.server_id,
+                "summary_id": summary['guid'],
+                "status": (percentage, status, timestamp),
+                "directory": summary['directory']
+            }
+        except Exception as e:
+            logging.exception('Could not show status')
+            raise e
 
     # com.gosmartsimulation.request_announce - release a status report on each
     # simulation in the database
