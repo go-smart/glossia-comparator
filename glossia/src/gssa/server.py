@@ -336,7 +336,9 @@ class GoSmartSimulationServerComponent(object):
             logger.warning("Simulation [%s] not found" % guid)
             return False
 
-        return True
+        result = yield from current.cancel()
+
+        return result
 
     # com.gosmartsimulation.request_files - push the requested output files
     # through the transferrer and return the list that was sent
