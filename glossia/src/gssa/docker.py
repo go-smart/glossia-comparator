@@ -289,11 +289,13 @@ class Submitter:
     @asyncio.coroutine
     def cancel(self):
         self._cancelled = True
-        yield from self.destroy()
+        yield from self.destroy(wait_for_response=False)
         return True
 
+    # We have an optional wait_for_response to avoid double-using readline
+    # during cancellation
     @asyncio.coroutine
-    def destroy(self):
+    def destroy(self, wait_for_response=True):
         # destroy should be idempotent - that's fine.
         if self._destroyed:
             return
@@ -303,13 +305,17 @@ class Submitter:
 
         # Tell the Docker side to tidy up
         self.send_command(self.writer, 'DESTROY', None)
-        success, message = yield from self.receive_response(self.reader)
-        logger.debug('<-- %s %s' % (str(success), str(message)))
 
-        if success:
-            self._destroyed = True
+        if wait_for_response:
+            success, message = yield from self.receive_response(self.reader)
+            logger.debug('<-- %s %s' % (str(success), str(message)))
+
+            if success:
+                self._destroyed = True
+            else:
+                raise RuntimeError('Could not destroy: %s', message)
         else:
-            raise RuntimeError('Could not destroy: %s', message)
+            self._destroyed = True
 
     def finalize(self):
         if not self.reader or not self.writer:
