@@ -40,6 +40,7 @@ class Submitter:
     _cancelled = False
     _destroyed = False
     _socket_location = None
+    _cancellation_lock = None
 
     def __init__(self):
         self._input_files = []
@@ -229,8 +230,14 @@ class Submitter:
 
             # Wait for the simulation to finish
             self.send_command(writer, 'WAIT', None)
-            success, message = yield from self.receive_response(reader)
+
+            self._wait_fut = asyncio.ensure_future(self.receive_response(reader))
+            success, message = yield from self._wait_fut
+            self._wait_fut = None
             logger.debug('<-- %s %s' % (str(success), str(message)))
+
+            if self._cancellation_lock:
+                yield from self._cancellation_lock
 
             if not success:
                 raise RuntimeError('Could not wait: %s', message)
@@ -288,8 +295,15 @@ class Submitter:
 
     @asyncio.coroutine
     def cancel(self):
+        if not self._wait_fut:
+            return False
+
         self._cancelled = True
-        yield from self.destroy(wait_for_response=False)
+        self._cancellation_lock = asyncio.Lock()
+        self._cancellation_lock.lock()
+        self._wait_fut.cancel()
+        yield from self.destroy(wait_for_response=True)
+        self._cancellation_lock.release()
         return True
 
     # We have an optional wait_for_response to avoid double-using readline
