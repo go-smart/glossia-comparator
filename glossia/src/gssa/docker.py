@@ -47,6 +47,7 @@ class Submitter:
         self._output_files = []
         self._output_directory = None
         self._output_lock = asyncio.Lock()
+        self._read_lock = asyncio.Lock()
 
     def __del__(self):
         # Tidy up before quitting
@@ -232,7 +233,12 @@ class Submitter:
             self.send_command(writer, 'WAIT', None)
 
             self._wait_fut = asyncio.ensure_future(self.receive_response(reader))
-            success, message = yield from self._wait_fut
+            with (yield from self._read_lock):
+                try:
+                    success, message = yield from self._wait_fut
+                except asyncio.CancelledError:
+                    success, message = False, "--cancelled--"
+
             self._wait_fut = None
             logger.debug('<-- %s %s' % (str(success), str(message)))
 
@@ -303,7 +309,8 @@ class Submitter:
         self._cancellation_lock = asyncio.Lock()
         with (yield from self._cancellation_lock):
             self._wait_fut.cancel()
-            yield from self.destroy(wait_for_response=True)
+            with (yield from self._read_lock):
+                yield from self.destroy(wait_for_response=True)
         return True
 
     # We have an optional wait_for_response to avoid double-using readline
