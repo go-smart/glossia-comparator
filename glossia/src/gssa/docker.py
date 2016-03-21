@@ -238,6 +238,7 @@ class Submitter:
 
             if self._cancellation_lock:
                 yield from self._cancellation_lock
+                self._cancellation_lock.release()
 
             if not success:
                 raise RuntimeError('Could not wait: %s', message)
@@ -300,10 +301,9 @@ class Submitter:
 
         self._cancelled = True
         self._cancellation_lock = asyncio.Lock()
-        self._cancellation_lock.lock()
-        self._wait_fut.cancel()
-        yield from self.destroy(wait_for_response=True)
-        self._cancellation_lock.release()
+        with (yield from self._cancellation_lock):
+            self._wait_fut.cancel()
+            yield from self.destroy(wait_for_response=True)
         return True
 
     # We have an optional wait_for_response to avoid double-using readline
