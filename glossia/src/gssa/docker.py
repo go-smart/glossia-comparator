@@ -241,7 +241,7 @@ class Submitter:
             success, message = yield from self.receive_response(reader)
             logger.debug('<-- %s %s' % (str(success), str(message.replace('\\n', '\n'))))
 
-            if not success:
+            if not success and not self._cancelled:
                 raise RuntimeError('Could not retrieve logs: %s', message)
 
             # Wait until the output directory has arrived in this container's volumes
