@@ -535,6 +535,8 @@ class GoSmartSimulationServerComponent(object):
         if not current:
             logger.warning("Tried to send simulation-specific completion event with no current simulation definition")
 
+        current.set_exit_status(True)
+
         # Record the finishing time, as we see it
         timestamp = time.time()
 
@@ -551,7 +553,6 @@ class GoSmartSimulationServerComponent(object):
             validation = None
             logger.exception("Problem with completion/validation")
 
-        current.set_exit_status(True)
         logger.info('Success [%s]' % guid)
 
         # Notify any subscribers
@@ -564,6 +565,8 @@ class GoSmartSimulationServerComponent(object):
         if not current:
             logger.warning("Tried to send simulation-specific failure event with no current simulation definition")
 
+        current.set_exit_status(False, message)
+
         # Record the failure time as we see it
         timestamp = time.time()
 
@@ -573,7 +576,6 @@ class GoSmartSimulationServerComponent(object):
         except:
             logger.exception("Problem saving failure status")
 
-        current.set_exit_status(False, message)
         logger.warning('Failure [%s]: %s' % (guid, repr(message)))
 
         # Notify any subscribers
@@ -678,11 +680,22 @@ class GoSmartSimulationServerComponent(object):
     # Update the status, setting up a callback for asyncio
     @asyncio.coroutine
     def updateStatus(self, guid, percentage, message):
+        progress = "%.2lf" % percentage if percentage else '##'
+
+        guid, current = yield from self._fetch_definition(guid)
+        if current:
+            directory = current.get_dir()
+        else:
+            logger.warning("Simulation [%s] not found" % guid)
+
+        if current.get_exit_status():
+            logger.warning("Got status message [%s%%:%s] for [%s], which has already exited." % (progress, message, guid))
+            return
+
         timestamp = time.time()
 
         # Write out to the command line for debug
         # TODO: switch to `logger` and `vigilant`
-        progress = "%.2lf" % percentage if percentage else '##'
         logger.debug("%s [%r] ---- %s%%: %s" % (guid, timestamp, progress, message))
 
         try:
@@ -692,12 +705,6 @@ class GoSmartSimulationServerComponent(object):
             logger.exception("Problem saving status")
 
         directory = None
-        guid, current = yield from self._fetch_definition(guid)
-        if current:
-            directory = current.get_dir()
-        else:
-            logger.warning("Simulation [%s] not found" % guid)
-
         # Publish a status update for the WAMP clients to see
         self.publish('com.gosmartsimulation.status', guid, (percentage, gssa.error.makeError('IN_PROGRESS', message)), directory, timestamp, None)
 
