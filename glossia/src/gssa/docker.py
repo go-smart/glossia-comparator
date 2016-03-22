@@ -260,7 +260,7 @@ class Submitter:
                 code, message = exit_status.split('\n', 1)
                 if self._cancelled:
                     message = "[Cancelled] " + message
-                code = gssa.error.Error[int(code)]
+                code = gssa.error.Error(int(code))
                 if code is gssa.error.SUCCESS:
                     outcome = True
                 else:
