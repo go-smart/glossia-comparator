@@ -68,7 +68,7 @@ class GoSmartSimulationServerComponent(object):
         with open("identity", "w") as f:
             f.write(identity)
 
-    def __init__(self, server_id, database, publish_cb, ignore_development=False, use_observant=use_observant):
+    def __init__(self, server_id, database, publish_cb, ignore_development=False, use_observant=use_observant, simdata_path='/tmp'):
         # This forwards exceptions to the client
         self.traceback_app = True
 
@@ -78,6 +78,7 @@ class GoSmartSimulationServerComponent(object):
         # Flag that tells the server to ignore anything with a parameter
         # `DEVELOPMENT` true
         self._ignore_development = ignore_development
+        self._simdata_path = simdata_path
 
         # If we are using vigilant, do the relevant set-up
         if use_observant:
@@ -277,7 +278,7 @@ class GoSmartSimulationServerComponent(object):
     @asyncio.coroutine
     def _handle_simulation_done(self, fut, guid):
         # This should be the return value of the simulate call
-        success = fut.result()
+        outcome = fut.result()
         logger.info("Simulation exited [%s]" % guid)
 
         guid, current = yield from self._fetch_definition(guid)
@@ -285,27 +286,18 @@ class GoSmartSimulationServerComponent(object):
             logger.warning("Definition %s not found" % guid)
             return False
 
-        if success:
+        if outcome is True:
             yield from self.eventComplete(guid)
-        elif success is None:
+        elif isinstance(outcome, gssa.error.ErrorMessage):
+            logger.warning("Failed simulation in %s" % current.get_dir())
+            yield from self.eventFail(guid, outcome)
+        elif outcome is None:
             # None indicates we've dealt with failure (errored) already
             pass
         else:
             # We know this did not succeed, but not why it failed
             code = gssa.error.Error.E_UNKNOWN
             error_message = "Unknown error occurred"
-
-            # In theory, an error message should have been written here, in any
-            # case
-            error_message_path = os.path.join(current.get_dir(), 'error_message')
-
-            if (os.path.exists(error_message_path)):
-                with open(error_message_path, 'r') as f:
-                    code = f.readline().strip()
-                    error_message = f.read().strip()
-                    error_message.encode('ascii', 'xmlcharrefreplace')
-                    error_message.encode('utf-8')
-
             logger.warning("Failed simulation in %s" % current.get_dir())
             yield from self.eventFail(guid, gssa.error.makeError(code, error_message))
 
@@ -444,7 +436,7 @@ class GoSmartSimulationServerComponent(object):
         try:
             # Create a working directory for the simulation (this is needed even
             # if the tool runs elsewhere, as in the Docker case)
-            tmpdir = tempfile.mkdtemp(prefix='/simdata/')
+            tmpdir = tempfile.mkdtemp(prefix='%s/' % self._simdata_path)
             os.chmod(tmpdir, 0o770)
             logger.debug("Changed permissions")
 

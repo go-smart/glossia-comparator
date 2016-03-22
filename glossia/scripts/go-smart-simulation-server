@@ -27,6 +27,7 @@ import argparse
 import uuid
 import logging
 import time
+import os
 
 
 logging.getLogger('watchdog.observers.inotify_buffer').setLevel(logging.DEBUG)
@@ -37,8 +38,14 @@ logger = logging.getLogger(__name__)
 # Start up a new simulation server object with the Autobahn WAMP application
 # Note that we explicitly define the type of DB store - this should be made
 # configurable
-def launch(x, server_id, ignore_development=False):
-    component = GoSmartSimulationServerSession(x, server_id, lambda: SQLiteSimulationDatabase("simulations.sqlite3"), ignore_development)
+def launch(x, server_id, ignore_development=False, simdata_path='/tmp'):
+    component = GoSmartSimulationServerSession(
+        x,
+        server_id,
+        lambda: SQLiteSimulationDatabase("simulations.sqlite3"),
+        ignore_development,
+        simdata_path
+    )
 
     return component
 
@@ -63,6 +70,11 @@ if __name__ == "__main__":
     ignore_development = args.ignore_development
     retries = args.retries
 
+    try:
+        simdata_path = os.environ['GLOSSIA_SIMULATION_DIRECTORY']
+    except KeyError:
+        simdata_path = '/tmp'
+
     # If the user has not supplied a particular server identity (that can be
     # used to exclusively refer to this persistent set of info in the DB) then
     # we generate a UUID
@@ -77,7 +89,7 @@ if __name__ == "__main__":
     while retry < retries:
         retry += 1
         try:
-            runner.run(lambda x: launch(x, server_id=server_id, ignore_development=ignore_development))
+            runner.run(lambda x: launch(x, server_id=server_id, ignore_development=ignore_development, simdata_path=simdata_path))
         except OSError as e:
             logger.warning("Connection refused...")
             time.sleep(1)

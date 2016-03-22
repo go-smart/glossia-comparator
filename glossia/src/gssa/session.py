@@ -31,13 +31,14 @@ from .server import GoSmartSimulationServerComponent
 class GoSmartSimulationServerSession(ApplicationSession):
     _component = None
 
-    def __init__(self, x, server_id, database, ignore_development=False):
+    def __init__(self, x, server_id, database, ignore_development=False, simdata_path='/tmp'):
         self.server_id = server_id
         self._component = GoSmartSimulationServerComponent(
             server_id,
             database,
             self.publish,
             ignore_development=ignore_development,
+            simdata_path=simdata_path
         )
         ApplicationSession.__init__(self, x)
 

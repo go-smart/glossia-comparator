@@ -229,27 +229,21 @@ class Submitter:
 
             os.rename(input_tmp_directory, input_directory)
 
+            # observer.stop()
+
             # Wait for the simulation to finish
-            self.send_command(writer, 'WAIT', None)
-
-            self._wait_fut = asyncio.ensure_future(self.receive_response(reader))
-            with (yield from self._read_lock):
-                try:
-                    success, message = yield from self._wait_fut
-                except asyncio.CancelledError:
-                    success, message = False, "--cancelled--"
-
-            self._wait_fut = None
-            logger.debug('<-- %s %s' % (str(success), str(message)))
-
-            if self._cancellation_lock:
+            # Wait until the output directory has arrived in this container's volumes
+            # This avoids any critical communication between container and Glossia
+            # (but it is important to allow cancellation)
+            self._wait_fut = asyncio.ensure_future(self._output_lock.acquire())
+            try:
+                yield from self._wait_fut
+            except asyncio.CancelledError:
+                logger.warning("Cancelled simulation")
                 yield from self._cancellation_lock
                 self._cancellation_lock.release()
-
-            if not success:
-                raise RuntimeError('Could not wait: %s', message)
-
-            # observer.stop()
+            finally:
+                self._output_lock.release()
 
             self.send_command(writer, 'LOGS', None)
             success, message = yield from self.receive_response(reader)
@@ -258,27 +252,29 @@ class Submitter:
             if not success and not self._cancelled:
                 raise RuntimeError('Could not retrieve logs: %s', message)
 
-            # Wait until the output directory has arrived in this container's volumes
-            yield from self._output_lock
-
             # Get the simulation exit status
             exit_status = self.output(os.path.join('logs', 'exit_status'))
 
+            outcome = False
             if exit_status:
                 code, message = exit_status.split('\n', 1)
                 if self._cancelled:
                     message = "[Cancelled] " + message
+                code = gssa.error.Error[code]
+                if code is gssa.error.SUCCESS:
+                    outcome = True
+                else:
+                    outcome = gssa.error.makeError(gssa.error.Error[code], message)
             elif self._cancelled:
                 code = gssa.error.Error.E_CANCELLED
-                message = "Cancelled at user request"
+                outcome = gssa.error.makeError(code, "Cancelled at user request")
             else:
                 code = gssa.error.Error.E_UNKNOWN
                 message = "Unknown error occurred (missing exit status)"
+                outcome = gssa.error.makeError(code, message)
 
             # If we did not exit cleanly, inform the server
-            if int(code) != 0:
-                raise RuntimeError('Non-zero exit status: %d %s' % (int(code), message))
-            logger.debug('<==> %s %s' % (str(code), str(message)))
+            (logger.debug if success is True else logger.warning)('<==> %s %s' % (str(code), str(message)))
 
             # Copy the logs back to the simulation 'working directory'
             for output_file in ('docker_inner.log', 'job.out', 'job.err'):
@@ -292,13 +288,10 @@ class Submitter:
                     logger.debug(output_log)
                 else:
                     logger.debug("[no output from %s]" % output_file)
-        except Exception as e:
-            # Redundant?!
-            success = False
+        finally:
             self.finalize()
-            raise e
 
-        return success
+        return outcome
 
     @asyncio.coroutine
     def cancel(self):
@@ -309,8 +302,7 @@ class Submitter:
         self._cancellation_lock = asyncio.Lock()
         with (yield from self._cancellation_lock):
             self._wait_fut.cancel()
-            with (yield from self._read_lock):
-                yield from self.destroy(wait_for_response=True)
+            yield from self.destroy(wait_for_response=True)
         return True
 
     # We have an optional wait_for_response to avoid double-using readline

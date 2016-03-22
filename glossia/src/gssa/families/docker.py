@@ -8,6 +8,7 @@ import logging
 from gssa.family import Family
 from gssa.docker import Submitter
 from gssa.parameters import convert_parameter
+import gssa.error
 
 
 class DockerFamily(Family):
@@ -118,16 +119,34 @@ class DockerFamily(Family):
             logging.debug("Removing definition of tar from files required")
 
         loop = asyncio.get_event_loop()
-        success = yield from self._submitter.run_script(
-            loop,
-            working_directory,
-            self._docker_image,
-            self._files_required.keys(),
-            magic_script
-        )
-        logging.debug("DONE")
+        try:
+            outcome = yield from self._submitter.run_script(
+                loop,
+                working_directory,
+                self._docker_image,
+                self._files_required.keys(),
+                magic_script
+            )
+            logging.debug("DONE")
+        except gssa.error.ErrorException as e:
+            outcome = e.get_error()
 
-        return success
+        # This is a "normal" failure, i.e. one from the simulation rather than
+        # the docker layer. That makes it the family's responsibility
+        if outcome is False or outcome is gssa.error.Error.E_UNKNOWN:
+            # In theory, an error message should have been written here, in any
+            # case
+            error_message_path = os.path.join(self.get_dir(), 'error_message')
+
+            if (os.path.exists(error_message_path)):
+                with open(error_message_path, 'r') as f:
+                    code = f.readline().strip()
+                    error_message = f.read().strip()
+                    error_message.encode('ascii', 'xmlcharrefreplace')
+                    error_message.encode('utf-8')
+                    outcome = gssa.error.makeError(code, error_message)
+
+        return outcome
 
     @asyncio.coroutine
     def clean(self):
