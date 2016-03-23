@@ -260,11 +260,21 @@ class Submitter:
                 code, message = exit_status.split('\n', 1)
                 if self._cancelled:
                     message = "[Cancelled] " + message
-                code = gssa.error.Error(int(code))
-                if code is gssa.error.Error.SUCCESS:
-                    outcome = True
+                try:
+                    int(code)
+                except:
+                    code = gssa.error.E_UNKNOWN.value
+
+                try:
+                    code = gssa.error.Error(int(code))
+                except ValueError as e:
+                    code = gssa.error.E_UNKNOWN
+                    message += "[Code " + str(code) + "]"
                 else:
-                    outcome = gssa.error.makeError(gssa.error.Error[code], message)
+                    if code is gssa.error.Error.SUCCESS:
+                        outcome = True
+                    else:
+                        outcome = gssa.error.makeError(gssa.error.Error[code], message)
             elif self._cancelled:
                 code = gssa.error.Error.E_CANCELLED
                 outcome = gssa.error.makeError(code, "Cancelled at user request")
