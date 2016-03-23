@@ -305,7 +305,7 @@ class Submitter:
                         logger.debug(output_log)
                     else:
                         logger.warning("[no output from %s]" % output_file)
-                elif not self.output(os.path.join('logs', output_file, exists_only=True)):
+                elif not self.output(os.path.join('logs', output_file), exists_only=True):
                     logger.warning("[no output from %s]" % output_file)
         finally:
             self.finalize()
