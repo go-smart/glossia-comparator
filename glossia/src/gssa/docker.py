@@ -274,8 +274,8 @@ class Submitter:
                     try:
                         code = gssa.error.Error[code]
                     except KeyError as e:
-                        code = gssa.error.Error.E_UNKNOWN
                         message += "[Code " + str(code) + "]"
+                        code = gssa.error.Error.E_UNKNOWN
 
                 if code is gssa.error.Error.SUCCESS:
                     outcome = True
