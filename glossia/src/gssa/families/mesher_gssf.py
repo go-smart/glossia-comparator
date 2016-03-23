@@ -259,8 +259,8 @@ class MesherGSSFMixin:
         if needlezonefield:
             lengthscales.set("needlezonefield", str(needlezonefield))
 
-        farfield = lengthscale_settings[1][1]
-        zonefield = lengthscale_settings[2][1]
+        farfield = str(lengthscale_settings[1][1])
+        zonefield = str(lengthscale_settings[2][1])
 
         # Each region may need to be added to the mesher section
         for idx, region in self._regions.items():
