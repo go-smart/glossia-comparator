@@ -136,7 +136,7 @@ class DockerFamily(Family):
         if outcome is False or outcome is gssa.error.Error.E_UNKNOWN:
             # In theory, an error message should have been written here, in any
             # case
-            error_message_path = os.path.join(self.get_dir(), 'error_message')
+            error_message_path = os.path.join(working_directory, 'error_message')
 
             if (os.path.exists(error_message_path)):
                 with open(error_message_path, 'r') as f:
@@ -144,7 +144,13 @@ class DockerFamily(Family):
                     error_message = f.read().strip()
                     error_message.encode('ascii', 'xmlcharrefreplace')
                     error_message.encode('utf-8')
-                    outcome = gssa.error.makeError(code, error_message)
+                    try:
+                        outcome = gssa.error.makeError(code, error_message)
+                    except ValueError:
+                        outcome = gssa.error.makeError(
+                            gssa.error.Error.E_UNKNOWN,
+                            "%s [Code: %s]" % (error_message, code)
+                        )
 
         return outcome
 
