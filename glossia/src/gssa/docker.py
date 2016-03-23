@@ -83,17 +83,20 @@ class Submitter:
         self._input_files.append(input_file)
 
     # Return the content of the file `requested`
-    def output(self, requested):
+    def output(self, requested, exists_only=False):
         if not self._output_directory:
             return None
 
         requested_location = os.path.join(self._output_directory, requested)
 
-        try:
-            with open(requested_location, 'r') as f:
-                return f.read()
-        except:
-            return None
+        if exists_only:
+            return os.path.exists(requested_location)
+        else:
+            try:
+                with open(requested_location, 'r') as f:
+                    return f.read()
+            except:
+                return None
 
     # Print a message to highlight a new output file from Docker
     def notify_output(self, filename):
@@ -117,6 +120,11 @@ class Submitter:
         dockerlaunch_socket_location = config.get(
             "dockerlaunch.socket_location",
             default_dockerlaunch_socket_location
+        )
+
+        dump_logs = config.get(
+            "dockerlaunch.dump_logs",
+            False
         )
 
         # Connect to the dockerlaunch daemon (we should be in the `dockerlaunch`
@@ -291,13 +299,16 @@ class Submitter:
                 logger.debug('-' * 20)
                 logger.debug(output_file.upper())
 
-                output_log = self.output(os.path.join('logs', output_file))
+                if dump_logs:
+                    output_log = self.output(os.path.join('logs', output_file))
 
-                # Print out the logs
-                if output_log:
-                    logger.debug(output_log)
-                else:
-                    logger.debug("[no output from %s]" % output_file)
+                    # Print out the logs
+                    if output_log:
+                        logger.debug(output_log)
+                    else:
+                        logger.warning("[no output from %s]" % output_file)
+                elif not self.output(os.path.join('logs', output_file, exists_only=True)):
+                    logger.warning("[no output from %s]" % output_file)
         finally:
             self.finalize()
 
