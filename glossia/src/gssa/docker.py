@@ -263,12 +263,12 @@ class Submitter:
                 try:
                     int(code)
                 except:
-                    code = gssa.error.E_UNKNOWN.value
+                    code = gssa.error.Error.E_UNKNOWN.value
 
                 try:
                     code = gssa.error.Error(int(code))
                 except ValueError as e:
-                    code = gssa.error.E_UNKNOWN
+                    code = gssa.error.Error.E_UNKNOWN
                     message += "[Code " + str(code) + "]"
                 else:
                     if code is gssa.error.Error.SUCCESS:
