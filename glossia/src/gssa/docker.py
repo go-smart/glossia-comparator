@@ -180,20 +180,27 @@ class Submitter:
             if not success:
                 raise RuntimeError('Could not start: %s', message)
 
+            self.send_command(writer, 'CONTAINER')
+            success, message = yield from self.receive_response(reader)
+            logger.debug('<-- %s %s' % (str(success), str(message)))
             try:
-                # Set up our basic locations, for accessing the Docker volume
-                if magic_script is not None:
-                    magic_script = os.path.join(
-                        input_tmp_directory,
-                        magic_script
-                    )
-                #self._output_directory = os.path.join(
-                #    tmpdir,
-                #    message['output subdirectory']
-                #)
-            except KeyError as e:
-                logger.error("Problem setting up Docker")
-                raise e
+                image_id = message['image_id']
+            except KeyError:
+                image_id = None
+
+            with open(os.path.join(input_tmp_directory, 'glossia-simimage.txt'), 'w') as image_file:
+                image_file.write(image_id if image_id else '[unknown]')
+
+            # Set up our basic locations, for accessing the Docker volume
+            if magic_script is not None:
+                magic_script = os.path.join(
+                    input_tmp_directory,
+                    magic_script
+                )
+            #self._output_directory = os.path.join(
+            #    tmpdir,
+            #    message['output subdirectory']
+            #)
 
             self._output_directory = os.path.join(tmpdir, 'output')
             logger.debug("Set magic script")
