@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from munkres import Munkres
-from difflib import Differ
+import difflib
 from .. import parameters
 
 # CDM: Clinical Domain Model (see documentation)
@@ -194,9 +194,8 @@ class SimulationDefinition:
                 elif not other.definition:
                     messages += ["Numerical Model: that has no definition"]
                 else:
-                    messages += ["Numerical Model: definitions differ"]
-                    d = Differ()
-                    messages += d.compare(self.definition, other.definition)
+                    d = difflib.unified_diff(self.definition.splitlines(), other.definition.splitlines())
+                    messages += ["Numerical Model: definitions differ:\n | " + "\n | ".join(line.strip() for line in d)]
 
             all_regions = set().union(self.regions.keys(), other.regions.keys())
             for id in all_regions:
