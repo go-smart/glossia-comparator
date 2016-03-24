@@ -131,27 +131,6 @@ class DockerFamily(Family):
         except gssa.error.ErrorException as e:
             outcome = e.get_error()
 
-        # This is a "normal" failure, i.e. one from the simulation rather than
-        # the docker layer. That makes it the family's responsibility
-        if outcome is False or outcome is gssa.error.Error.E_UNKNOWN:
-            # In theory, an error message should have been written here, in any
-            # case
-            error_message_path = os.path.join(working_directory, 'error_message')
-
-            if (os.path.exists(error_message_path)):
-                with open(error_message_path, 'r') as f:
-                    code = f.readline().strip()
-                    error_message = f.read().strip()
-                    error_message.encode('ascii', 'xmlcharrefreplace')
-                    error_message.encode('utf-8')
-                    try:
-                        outcome = gssa.error.makeError(code, error_message)
-                    except ValueError:
-                        outcome = gssa.error.makeError(
-                            gssa.error.Error.E_UNKNOWN,
-                            "%s [Code: %s]" % (error_message, code)
-                        )
-
         return outcome
 
     @asyncio.coroutine

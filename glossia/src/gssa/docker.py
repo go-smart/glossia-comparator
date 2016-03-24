@@ -265,16 +265,16 @@ class Submitter:
 
             outcome = False
             if exit_status:
-                code, message = exit_status.split('\n', 1)
+                code_string, message = exit_status.split('\n', 1)
                 if self._cancelled:
                     message = "[Cancelled] " + message
                 try:
-                    code = gssa.error.Error(code)
-                except ValueError as e:
+                    code = gssa.error.Error[code_string]
+                except KeyError as e:
                     try:
-                        code = gssa.error.Error[code]
-                    except KeyError as e:
-                        message += "[Code " + str(code) + "]"
+                        code = gssa.error.Error(int(code_string))
+                    except ValueError as e:
+                        message += " [Code " + code_string + "]"
                         code = gssa.error.Error.E_UNKNOWN
 
                 if code is gssa.error.Error.SUCCESS:
