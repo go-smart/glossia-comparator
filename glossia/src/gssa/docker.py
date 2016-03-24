@@ -105,7 +105,7 @@ class Submitter:
             self._output_files.append(filename)
 
     # Send a command to the dockerlaunch daemon
-    def send_command(self, writer, command, arguments):
+    def send_command(self, writer, command, arguments=None):
         logger.debug('--> %s %s' % (command, str(arguments)))
         writer.write(bytes("%s\n" % json.dumps({
             'command': command,
