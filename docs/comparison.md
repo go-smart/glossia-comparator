@@ -4,21 +4,18 @@ Comparison of GSSA-XML documents
 This tool allows diff-ing of two XML documents based on their conceptual content
 and returning a human-readable comparison.
 
-go-smart-comparator
--------------------
+## go-smart-comparator
 
 This is a simple wrapper script taking two GSSA-XML files and outputting the
 difference in human-readable format.
 
-Usage
-+++++
+### Usage
 
 The script takes only two arguments: the files to be compared.
 
     go-smart-comparator file1.xml file2.xml
 
-Methodology
-+++++++++++
+## Methodology
 
 The ``gssa.comparator`` module loads each file into a
 ``SimulationDefinition`` object, which has a [CDM](cdm/overview.md)-based understanding
