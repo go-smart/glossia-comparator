@@ -14,7 +14,7 @@ Contents:
    :maxdepth: 2
 
    Comparison <comparison.md>
-   Errors <errors.md>
+   Errors <errors.rst>
    GSSA XML Format <gssa-xml.md>
    Families<families.md>
    Clinical Domain Model <cdm/index.rst>
