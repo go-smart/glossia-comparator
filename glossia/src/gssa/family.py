@@ -28,9 +28,13 @@ logger = logging.getLogger(__name__)
 register = {}
 
 
-# This metaclass ensures that any new Family class gets registered for access
-# from GSSA-XML
 class FamilyType(type):
+    """Metaclass for families.
+
+    This metaclass ensures that any new Family class gets registered for access
+    from GSSA-XML.
+
+    """
     def __init__(cls, clsname, bases, dct):
         if cls.family_name is not None:
             register[cls.family_name] = cls
@@ -38,12 +42,13 @@ class FamilyType(type):
         return type.__init__(cls, clsname, bases, dct)
 
 
-# Essential routines for Families
 class Family(metaclass=FamilyType):
+    """Essential routines for Families."""
     family_name = None
 
-    # Certain bits of the numerical model should always be present
     def load_core_definition(self, xml, parameters, algorithms):
+        """Certain bits of the numerical model should always be present."""
+
         self._needles = {}
         self._regions = {}
         self._regions_by_meaning = {}
@@ -133,9 +138,13 @@ class Family(metaclass=FamilyType):
         else:
             self._definition = self._definition.text
 
-    # Needle index can be either needle index (as given in XML input) or an
-    # integer n indicating the nth needle in the order of the needles XML block
     def get_needle_parameter(self, needle_index, key, try_json=True):
+        """Retrieve a parameter for a given needle.
+
+        Needle index can be either needle index (as given in XML input) or an
+        integer n indicating the nth needle in the order of the needles XML block.
+
+        """
         if needle_index not in self._needles and needle_index in self._needle_order:
             needle_index = self._needle_order[needle_index]
 
@@ -143,8 +152,8 @@ class Family(metaclass=FamilyType):
 
         return value
 
-    # Retrieve a parameter from the global (not needle) list
     def get_parameter(self, key, try_json=True, parameters=None):
+        """Retrieve a parameter from the global (not needle) list."""
         if parameters is None:
             parameters = self._parameters
 

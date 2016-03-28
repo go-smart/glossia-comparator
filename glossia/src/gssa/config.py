@@ -32,7 +32,13 @@ __config_file = None
 __api_version = 'A0.1'
 
 
-def init_logger(name):
+def init_logger():
+    """Set up logging.
+
+    Uses standard Python logging module, although will set up
+    ``txaio`` if ``logging.txaio`` is True in the configuration.
+
+    """
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
     if get('logging.txaio', False):
@@ -41,6 +47,15 @@ def init_logger(name):
 
 
 def init_config(config_file=None):
+    """Load the configuration file.
+
+    Args:
+        config_file (Optional[str]): Load the YAML configuration
+            from this file. Defaults to [etc_location]/glossia.yml.
+            In a system-wide install, this might be
+            /usr/local/etc/glossia/glossia.yml
+
+    """
     global __config, __config_file
 
     if config_file is None:
@@ -57,6 +72,18 @@ def init_config(config_file=None):
 
 
 def get(key, default=None):
+    """Get a value from the global configuration.
+
+    If the config file is not loaded, it will be loaded when this is
+    called.
+
+    Args:
+        key (str): A dot-separated hierarchical key to find in the YAML
+            configuration file.
+        default (Optional) : Fall-back to return if the key is not found.
+            Defaults to None.
+
+    """
     if __config is None:
         init_config()
 
@@ -70,8 +97,10 @@ def get(key, default=None):
 
 
 def get_config_file():
+    """Get the location of the main configuration file."""
     return __config_file
 
 
 def get_api_version():
+    """Retrieve the API version for this server."""
     return __api_version

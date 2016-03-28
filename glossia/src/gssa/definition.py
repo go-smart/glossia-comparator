@@ -45,17 +45,21 @@ class GoSmartSimulationDefinition:
     _shadowing = False
     _status = None
 
-    # Set the status to be recorded in the DB
     def set_exit_status(self, success, message=None):
+        """Set the status to be recorded in the DB."""
         self._exit_status = (success, message)
 
     def get_exit_status(self):
         return self._exit_status
 
-    # Once we have a status connection from the simulation feed messages back to
-    # the server
     @asyncio.coroutine
     def _handle_percentage_connection(self, stream_reader, stream_writer):
+        """Set up percentage relay.
+
+        Once we have a status connection from the simulation feed messages back to
+        the server
+
+        """
         logger.debug('Got percentage connection')
         while True:
             line = yield from stream_reader.readline()
@@ -79,9 +83,9 @@ class GoSmartSimulationDefinition:
             self._status = {'percentage': percentage, 'message': message, 'timestamp': time.time()}
             self._update_status_callback(percentage, message)
 
-    # Start up the status server
     @asyncio.coroutine
     def init_percentage_socket_server(self):
+        """Start up the status server."""
         if self._shadowing:
             logger.debug('No percentages: shadowing')
             self._percentage_socket_server = None
@@ -133,8 +137,9 @@ class GoSmartSimulationDefinition:
             with open(os.path.join(tmpdir, "guid"), "w") as f:
                 f.write(guid)
 
-    # Provide a handy synopsis
     def summary(self):
+        """Provide a handy synopsis of this definition."""
+
         return {
             'guid': self._guid,
             'directory': self._dir,
@@ -143,20 +148,29 @@ class GoSmartSimulationDefinition:
             'status': self._status
         }
 
-    # This directory indicates where on the client's system we should be
-    # pulling/pushing from/to
     def get_remote_dir(self):
+        """Get remote directory location.
+
+        This directory indicates where on the client's
+        system we should be pulling/pushing from/to.
+
+        """
         return self._remote_dir
 
     def set_remote_dir(self, remote_dir):
         self._remote_dir = remote_dir
 
-    # Find the GUID
     def get_guid(self):
+        """Return the simulation's GUID."""
         return self._guid
 
-    # Turn the XML into an ElementTree object
     def create_xml_from_string(self, xml):
+        """Turn the string XML into an ElementTree object.
+
+        Args:
+            xml (str): string-version of GSSA-XML.
+
+        """
         self._finalized = False
 
         try:
@@ -167,15 +181,15 @@ class GoSmartSimulationDefinition:
 
         return True
 
-    # Wraps the file transferrer
     def update_files(self, files):
+        """Wraps the file transferrer."""
         self._files.update(files)
 
     def get_files(self):
         return self._files
 
-    # Do the heavy lifting of interpreting the GSSA-XML
     def finalize(self):
+        """Trigger the heavy lifting of interpreting the GSSA-XML."""
         logger.debug("Finalize - Translating Called")
         if self._xml is None:
             return False
@@ -227,21 +241,21 @@ class GoSmartSimulationDefinition:
     def finalized(self):
         return self._finalized
 
-    # Return working directory
     def get_dir(self):
+        """Return working directory."""
         return self._dir
 
-    # Clean out the working directory
     @asyncio.coroutine
     def clean(self):
+        """Clean out the working directory."""
         yield from self._model_builder.clean()
 
         shutil.rmtree(self._dir)
 
         return True
 
-    # Create a results archive
     def gather_results(self):
+        """Create a results archive."""
         output_directory = os.path.join(self.get_dir(), 'output')
         output_final_directory = os.path.join(self.get_dir(), 'output.final')
 
@@ -254,8 +268,8 @@ class GoSmartSimulationDefinition:
 
         return self._gather_files('results_archive.tgz', result_files)
 
-    # Create a diagnostic archive
     def gather_diagnostic(self):
+        """Create a diagnostic archive."""
         input_directory = os.path.join(self.get_dir(), 'input')
         input_final_directory = os.path.join(self.get_dir(), 'input.final')
         output_directory = os.path.join(self.get_dir(), 'output')
@@ -271,8 +285,8 @@ class GoSmartSimulationDefinition:
 
         return self._gather_files('diagnostic_archive.tgz', diagnostic_files)
 
-    # Turn a list of files into an archive
     def _gather_files(self, archive_name, files):
+        """Turn a list of files into an archive."""
         missing_file = os.path.join(self.get_dir(), 'missing.txt')
 
         logger.debug("Creating tarfile")
@@ -292,8 +306,8 @@ class GoSmartSimulationDefinition:
 
         return archive
 
-    # Send back the results
     def push_files(self, files, transferrer=None):
+        """Send back the results."""
         if self._shadowing:
             logger.warning("Not simulating: shadowing mode ON for this definition")
             return {}
@@ -318,11 +332,13 @@ class GoSmartSimulationDefinition:
 
     @asyncio.coroutine
     def cancel(self):
+        """Send the cancel request to the model builder (family)."""
         success = yield from self._model_builder.cancel()
         return success
 
     @asyncio.coroutine
     def simulate(self):
+        """Tell the family to start simulating."""
         if self._shadowing:
             logger.warning("Not simulating: shadowing mode ON for this definition")
             raise RuntimeError("Failing here to leave simulation for external server control")
@@ -342,6 +358,7 @@ class GoSmartSimulationDefinition:
 
     @asyncio.coroutine
     def validation(self):
+        """DEPRECATED: run validation (requires third-party tool)."""
         if self._shadowing:
             logger.warning("Not validating: shadowing mode ON for this definition")
             return None

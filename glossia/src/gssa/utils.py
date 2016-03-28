@@ -8,6 +8,13 @@ except:
 
 
 def get_default_gateway():
+    """Returns the default gateway of this machine (container).
+
+    This method is primarily intended for use communicating with
+    ad-hoc Glot HTTP servers for file transfer (not an intended
+    application of WAMP, so an alternative approach must be used).
+
+    """
     if not pyroute2:
         return None
 

@@ -19,6 +19,12 @@ import json
 
 
 def convert_parameter(parameter, typ=None, try_json=True):
+    """Turn a parameter value into a Python object.
+
+    Normally a string, but casting is intended to be idempotent.
+
+    """
+
     # Why do we distinguish between numeric classes in Python?!
     # Because we do not want to introduce rounding errors where
     # none are expected by switching a counter to float. Also,
@@ -57,4 +63,5 @@ def convert_parameter(parameter, typ=None, try_json=True):
 
 
 def read_parameters(element):
+    """Turn an XML node containing parameter definitions into a dictionary of parameters."""
     return dict(map(lambda p: (p.get('name'), (p.get('value'), p.get('type') if p.get('type') else None)), element))

@@ -27,8 +27,12 @@ logger = logging.getLogger(__name__)
 from .server import GoSmartSimulationServerComponent
 
 
-# This subclasses ApplicationSession, which runs inside an Autobahn WAMP session
 class GoSmartSimulationServerSession(ApplicationSession):
+    """This subclasses ApplicationSession, which runs inside an Autobahn WAMP session.
+
+    .. inheritance-diagram:: gssa.session.GoSmartSimulationServerSession
+
+    """
     _component = None
 
     def __init__(self, x, server_id, database, ignore_development=False, simdata_path='/tmp'):
@@ -42,32 +46,60 @@ class GoSmartSimulationServerSession(ApplicationSession):
         )
         ApplicationSession.__init__(self, x)
 
-    # com.gosmartsimulation.search - check for matching definitions
     @asyncio.coroutine
     def doSearch(self, guid, limit=None):
+        """``com.gosmartsimulation.search``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doSearch`
+
+        Check for matching definitions.
+
+        """
         return self._component.doSearch(guid, limit)
 
-    # com.gosmartsimulation.init - dummy call for the moment
     @asyncio.coroutine
     def doInit(self, guid):
+        """``com.gosmartsimulation.init``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doInit`
+
+        Dummy call for the moment.
+
+        """
         return self._component.doInit(guid)
 
-    # com.gosmartsimulation.api - find the current API version in use
-    # The API version only needs to be bumped when backward-incompatible changes
-    # occur on either side
     @asyncio.coroutine
     def doApi(self):
+        """``com.gosmartsimulation.api``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doApi`
+
+        Find the current API version in use. The API version only needs to be
+        bumped when backward-incompatible changes occur on either side.
+
+        """
         return self._component.doApi()
 
-    # com.gosmartsimulation.clean - remove anything in simulation working
-    # directory, for instance
     @asyncio.coroutine
     def doClean(self, guid):
+        """``com.gosmartsimulation.clean``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doClean`
+
+        Remove anything in simulation directory, for instance.
+
+        """
         return self._component.doClean(guid)
 
-    # com.gosmartsimulation.start - execute the simulation in a coro
     @asyncio.coroutine
     def doStart(self, guid):
+        """``com.gosmartsimulation.start``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doStart`
+
+        Execute the simulation in a coro.
+
+        """
         return self._component.doStart(guid)
 
     @asyncio.coroutine
@@ -75,83 +107,151 @@ class GoSmartSimulationServerSession(ApplicationSession):
         # RMV: This is hacky
         return self._component.doTmpValidation(directory)
 
-    # com.gosmartsimulation.update_files - add the passed files to the
-    # simulation's reference dictionary of required input files (available to be
-    # requested later)
     @asyncio.coroutine
     def doUpdateFiles(self, guid, files):
+        """``com.gosmartsimulation.update_files``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doUpdateFiles`
+
+        Add the passed files to simulation's reference dictionary of required
+        input files (available to be requested later).
+
+        """
         return self._component.doUpdateFiles(guid, files)
 
-    # com.gosmartsimulation.cancel - prematurely stop a running simulation
-    # bear in mind that no request for confirmation exists!
     @asyncio.coroutine
     def doCancel(self, guid):
+        """``com.gosmartsimulation.cancel``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doCancel`
+
+        Prematurely stop a running simulation but bear in mind that no request for
+        confirmation exists!
+
+        """
         return self._component.doCancel(guid)
 
-    # com.gosmartsimulation.request_files - push the requested output files
-    # through the transferrer and return the list that was sent
     @asyncio.coroutine
     def doRequestFiles(self, guid, files):
+        """``com.gosmartsimulation.request_files``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doRequestFiles`
+
+        Push the requested output files through the transferrer and return the
+        list that was sent.
+
+        """
         return self._component.doRequestFiles(guid, files)
 
-    # com.gosmartsimulation.compare - check whether two GSSA-XML files match
-    # and, if not, what their differences are
     @asyncio.coroutine
     def doCompare(self, this_xml, that_xml):
+        """``com.gosmartsimulation.compare``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doCompare`
+
+        Check whether two GSSA-XML files match and, if not, what their
+        differences are.
+
+        """
         return self._component.doCompare(this_xml, that_xml)
 
-    # com.gosmartsimulation.update_settings_xml - set the GSSA-XML for a given
-    # simulation
     @asyncio.coroutine
     def doUpdateSettingsXml(self, guid, xml):
+        """``com.gosmartsimulation.update_settings_xml``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doUpdateSettingsXml`
+
+        Set the GSSA-XML for a given simulation.
+
+        """
         return self._component.doUpdateSettingsXml(guid, xml)
 
-    # com.gosmartsimulation.finalize - do any remaining preparation before the
-    # simulation can start
     @asyncio.coroutine
     def doFinalize(self, guid, client_directory_prefix):
+        """``com.gosmartsimulation.finalize``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doFinalize`
+
+        Do any remaining preparation before the simulation can start.
+
+        """
         return self._component.doFinalize(guid, client_directory_prefix)
 
-    # com.gosmartsimulation.properties - return important server-side simulation
-    # properties
     @asyncio.coroutine
     def doProperties(self, guid):
+        """``com.gosmartsimulation.properties``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doProperties`
+
+        Return important server-side simulation properties.
+
+        """
         return self._component.doProperties(guid)
 
-    # com.gosmartsimulation.request_results - push a bundle of result
-    # files through the transferrer
     @asyncio.coroutine
     def doRequestResults(self, guid, target):
+        """``com.gosmartsimulation.request_results``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doRequestResults`
+
+        Push a bundle of result files through the transferrer.
+
+        """
         return self._component.doRequestResults(guid, target)
 
-    # com.gosmartsimulation.request_diagnostic - push a bundle of diagnostic
-    # files through the transferrer
     @asyncio.coroutine
     def doRequestDiagnostic(self, guid, target):
+        """``com.gosmartsimulation.request_diagnostic``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doRequestDiagnostic`
+
+        Push a bundle of diagnostic files through the transferrer.
+
+        """
         return self._component.doRequestDiagnostic(guid, target)
 
-    # com.gosmartsimulation.retrieve_status - get the latest status for a
-    # simulation
     @asyncio.coroutine
     def doRetrieveStatus(self, guid):
+        """``com.gosmartsimulation.retrieve_status``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doRetrieveStatus`
+
+        Get the latest status for a simulation.
+
+        """
         return self._component.doRetrieveStatus(guid)
 
-    # com.gosmartsimulation.request_announce - release a status report on each
-    # simulation in the database
-    # TODO: this gets unwieldy, perhaps it should have an earliest simulation
-    # timestamp argument?
     @asyncio.coroutine
     def onRequestAnnounce(self):
+        """``com.gosmartsimulation.request_announce``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.onRequestAnnounce`
+
+        Release a status report on each simulation in the database. TODO: this
+        gets unwieldy, perhaps it should have an earliest simulation timestamp
+        argument?.
+
+        """
         self._component.onRequestAnnounce()
 
-    # com.gosmartsimulation.request_identify - publish basic server information
     @asyncio.coroutine
     def onRequestIdentify(self):
+        """``com.gosmartsimulation.request_identify``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.onRequestIdentify`
+
+        Publish basic server information.
+
+        """
         self._component.onRequestIdentify()
 
-    # Fired when we first join the router - this gives us a chance to register
-    # everything
     def onJoin(self, details):
+        """Register methods and subscribes.
+
+        Fired when we first join the router - this gives us a chance to
+        register everything.
+
+        """
         logger.info("session ready")
 
         # Register an us-specific set of RPC calls. Also attempts to do the same

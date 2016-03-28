@@ -19,15 +19,30 @@
 from .parameters import read_parameters
 
 
-# This extracts basic information, common to all families, from GSSA-XML
 class GoSmartSimulationTranslator:
+    """This extracts basic information, common to all families, from GSSA-XML."""
     def __init__(self):
         self._files_required = {}
 
     def get_files_required(self):
+        """Return a list of files that should be sent back to the client.
+
+        This may be supplemented by the family when examining the model.
+
+        """
         return self._files_required
 
     def translate(self, xml):
+        """Extract basic information from GSSA-XML.
+
+        Returns:
+            tuple:
+                - lxml.etree.Element: numerical model node
+                - lxml.etree.Element: node full of global parameters
+                - lxml.etree.Element: node full of algorithms
+
+        """
+
         parameters = {}
         parameters_node = xml.find('parameters')
 

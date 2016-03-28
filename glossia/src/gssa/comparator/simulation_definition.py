@@ -23,13 +23,17 @@ from .. import parameters
 # CDM: Clinical Domain Model (see documentation)
 
 
-# Abstract definition of a GSSA simulation. Ideally, this would be incorporated
-# into GSSA itself as a nicer way of representing the GSSA-XML content for
-# processing. It also contains an understanding of diffing.
-# TODO: incorporate SimulationDefinition into server code
 class SimulationDefinition:
-    # This represents an argument to an algorithm (more generally, DB-defined lambda
-    # function) [see CDM]
+    """Abstract definition of a GSSA simulation.
+
+    Ideally, this would be incorporated
+    into GSSA itself as a nicer way of representing the GSSA-XML content for
+    processing. It also contains an understanding of diffing.
+    TODO: incorporate SimulationDefinition into server code
+    This represents an argument to an algorithm (more generally, DB-defined lambda
+    function) [see CDM]
+
+    """
     class Argument:
         name = ""
 
@@ -48,9 +52,13 @@ class SimulationDefinition:
         def __eq__(self, other):
             return self.diff(other)
 
-    # This is a percutaneous needle (more generally, one of a set of possible
-    # implements used in a procedure, possibly with repetition) [see CDM]
     class Needle:
+        """A percutaneous needle.
+
+        More generally, one of a set of possible
+        implements used in a procedure, possibly with repetition) [see CDM]
+
+        """
         index = ""
         cls = ""
         file = ""
@@ -62,9 +70,9 @@ class SimulationDefinition:
             self.file = file
             self.parameters = dict((p[0], SimulationDefinition.Parameter(*p)) for p in parameters)
 
-        # Needles are defined by their class, ID/file and their parameters (inc.
-        # location) [see CDM]
         def diff(self, other):
+            """Needles are defined by their class, ID/file and their parameters (inc.
+            location) [see CDM]"""
             messages = []
 
             string_comparisons = {
@@ -89,8 +97,8 @@ class SimulationDefinition:
         def __eq__(self, other):
             return self.diff(other) == []
 
-    # Regions are geometric subdomains (2D/3D) [see CDM]
     class Region:
+        """Regions are geometric subdomains (2D/3D) [see CDM]."""
         id = ""
         name = ""
         format = ""
@@ -104,10 +112,10 @@ class SimulationDefinition:
             self.input = input
             self.groups = groups
 
-        # A region's definition is, strictly, in the separate geometry file
-        # describing it (usually), but the GSSA-XML should be able to provide
-        # enough information to tie it down
         def diff(self, other):
+            """A region's definition is, strictly, in the separate geometry file
+            describing it (usually), but the GSSA-XML should be able to provide
+            enough information to tie it down."""
             messages = []
 
             string_comparisons = {
@@ -132,11 +140,11 @@ class SimulationDefinition:
         def __eq__(self, other):
             return self.diff(other) == []
 
-    # An algorithm is a DB-defined lambda function that takes simulation-time
-    # arguments, such as Time or CurrentNeedleLength, and returns a
-    # Parameter-like value. In the GSSF case, these are generally MATC functions
-    # [see CDM]
     class Algorithm:
+        """An algorithm is a DB-defined lambda function that takes simulation-time
+        arguments, such as Time or CurrentNeedleLength, and returns a
+        Parameter-like value. In the GSSF case, these are generally MATC functions
+        [see CDM]."""
         result = ""
         arguments = None
         content = ""
@@ -146,8 +154,8 @@ class SimulationDefinition:
             self.arguments = dict((a, SimulationDefinition.Argument(a)) for a in arguments)
             self.content = content
 
-        # An Algorithm is defined by its result (parameter), arguments (above) and content (textual)
         def diff(self, other):
+            """An Algorithm is defined by its result (parameter), arguments (above) and content (textual)."""
             messages = []
 
             if self.result != other.result:
@@ -170,11 +178,11 @@ class SimulationDefinition:
         def __eq__(self, other):
             return self.diff(other) == []
 
-    # The Numerical Model is a template or, say, a Python code using the
-    # helper Go-Smart module to define run-time GSSA parameters. The code is its
-    # definition, along with the regions, needles, parameters and so forth needed
-    # to complete it [see CDM]
     class NumericalModel:
+        """The Numerical Model is a template or, say, a Python code using the
+        helper Go-Smart module to define run-time GSSA parameters. The code is its
+        definition, along with the regions, needles, parameters and so forth needed
+        to complete it [see CDM]."""
         definition = ""
         regions = None
         needles = None
@@ -231,9 +239,9 @@ class SimulationDefinition:
         def __eq__(self, other):
             return self.diff(other) == []
 
-    # This is the fundamental class representing an arbitrary-type attribute of
-    # a simulation [see CDM]
     class Parameter:
+        """This is the fundamental class representing an arbitrary-type attribute of
+        a simulation [see CDM]."""
         value = None
         typ = ""
         name = ""
@@ -259,10 +267,10 @@ class SimulationDefinition:
         def __eq__(self, other):
             return self.diff(other) == []
 
-    # This is not part of the CDM, being a setting indicating how the simulation
-    # server should receive or send separate files, however it is a key
-    # component of GSSA-XML
     class Transferrer:
+        """This is not part of the CDM, being a setting indicating how the simulation
+        server should receive or send separate files, however it is a key
+        component of GSSA-XML."""
         url = ""
         cls = ""
 
@@ -306,9 +314,9 @@ class SimulationDefinition:
     def set_numerical_model(self, definition, regions, needles):
         self.numerical_model = self.NumericalModel(definition, regions, needles)
 
-    # Produce a series of human-readable messages describing the
-    # non-equivalences between this and another ("that") definition
     def diff(self, other):
+        """Produce a series of human-readable messages describing the
+        non-equivalences between this and another ("that") definition."""
         messages = []
 
         # At each step we check whether the relevant component is present in one

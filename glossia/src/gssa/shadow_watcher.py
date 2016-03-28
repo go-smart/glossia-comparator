@@ -20,6 +20,7 @@ _PROGRESS_FILE = 'progress.vtp'
 # functionality, tested in very specific situations
 @asyncio.coroutine
 def observe(guid, transferrer, update_callback):
+    """DEPRECATED"""
     transferrer.connect()
 
     completed = None

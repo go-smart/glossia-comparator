@@ -96,8 +96,13 @@ class GoSmartSimulationClientComponent(ApplicationSession):
         self._skip_clean = skip_clean
 
     def make_call(self, suffix):
-        # If we have a specific server, address it, otherwise we call whichever
-        # one got the full namespace
+        """Make a call ``com.gosmartsimulation.DEST.suffix``.
+
+        If this object has a default server set, address it,
+        otherwise we call whichever
+        one got the full namespace.
+
+        """
         if self._server:
             return "com.gosmartsimulation.%s.%s" % (self._server, suffix)
         else:
@@ -166,6 +171,7 @@ class GoSmartSimulationClientComponent(ApplicationSession):
             logger.info("Skipping clean-up")
 
     def shutdown(self):
+        """Start the exiting steps."""
         self.leave()
 
     @wrapped_coroutine

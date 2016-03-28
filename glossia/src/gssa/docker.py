@@ -32,9 +32,13 @@ class OutputHandler(AIOEventHandler, FileSystemEventHandler):
             self._lock.release()
 
 
-# Submit the request to run an instance to the dockerlaunch daemon, also
-# handling some of the standard bits and pieces of interface
 class Submitter:
+    """Utility to manage communication with dockerlaunch.
+
+    Submit the request to run an instance to the dockerlaunch daemon, also
+    handling some of the standard bits and pieces of interface.
+
+    """
     reader = None
     writer = None
     _cancelled = False
@@ -54,11 +58,16 @@ class Submitter:
         self.finalize()
 
     def set_update_socket(self, socket_location):
+        """Set the socket that the bridge container should use to communicate."""
         self._socket_location = socket_location
 
-    # Copy output files from the Docker volume to the simulation 'working
-    # directory'
     def copy_output(self, requested, target):
+        """Retrieve output.
+
+        Copy output files from the Docker volume to the simulation 'working
+        directory'
+
+        """
         if not self._output_directory:
             return None
 
@@ -77,13 +86,27 @@ class Submitter:
 
         return True
 
-    # Make a note that this file should be transferred to the Docker volume for
-    # the simulation
     def add_input(self, input_file):
+        """Set additional input.
+
+        Make a note that this file should be transferred to the Docker volume for
+        the simulation
+
+        """
         self._input_files.append(input_file)
 
-    # Return the content of the file `requested`
     def output(self, requested, exists_only=False):
+        """Return the content of the file ``requested``
+
+        Args:
+            requested (str): file name to request
+            exists_only (Optional[bool]): only check existence, don't load
+
+        Returns:
+            str|bool: file content unless exists_only set, then existence True/False.
+
+        """
+
         if not self._output_directory:
             return None
 
@@ -98,23 +121,35 @@ class Submitter:
             except:
                 return None
 
-    # Print a message to highlight a new output file from Docker
     def notify_output(self, filename):
+        """Print a message to highlight a new output file from Docker."""
+
         logger.debug('Output: %s' % filename)
         if filename not in self._output_files:
             self._output_files.append(filename)
 
-    # Send a command to the dockerlaunch daemon
     def send_command(self, writer, command, arguments=None):
+        """Send a command to the dockerlaunch daemon."""
+
         logger.debug('--> %s %s' % (command, str(arguments)))
         writer.write(bytes("%s\n" % json.dumps({
             'command': command,
             'arguments': arguments
         }), 'UTF-8'))
 
-    # Run the simulation
     @asyncio.coroutine
     def run_script(self, loop, working_directory, image, files_required=[], magic_script=None):
+        """Run the simulation.
+
+        Args:
+            loop (asyncio.BaseEventLoop): look to use for asynchronous calls.
+            working_directory (str): location of simulation configuration/definition.
+            image (str): a container image name.
+                This must be known to dockerlaunch or it will refuse to run.
+            files_required (Optional[array(str)]): files to return as output.
+            magic_script (Optional[str]): DEPRECATED: script to upload to simulation
+                container after all else in place as a trigger (default off).
+        """
         success = True
 
         dockerlaunch_socket_location = config.get(
@@ -321,6 +356,8 @@ class Submitter:
 
     @asyncio.coroutine
     def cancel(self):
+        """Break the output wait and instruct dockerlaunch to destroy simulation."""
+
         if not self._wait_fut:
             return False
 
@@ -331,10 +368,9 @@ class Submitter:
             yield from self.destroy(wait_for_response=True)
         return True
 
-    # We have an optional wait_for_response to avoid double-using readline
-    # during cancellation
     @asyncio.coroutine
     def destroy(self, wait_for_response=True):
+        """Destroy the simulation/bridge containers."""
         # destroy should be idempotent - that's fine.
         if self._destroyed:
             return
@@ -357,6 +393,7 @@ class Submitter:
             self._destroyed = True
 
     def finalize(self):
+        """Close dockerlaunch connection."""
         if not self.reader or not self.writer:
             return
 
@@ -368,6 +405,7 @@ class Submitter:
 
     @asyncio.coroutine
     def receive_response(self, reader):
+        """Handle JSON reply from dockerlaunch and format neatly."""
         while True:
             line = yield from reader.readline()
 

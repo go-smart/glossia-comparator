@@ -1,3 +1,3 @@
 from . import config
 
-config.init_logger(__name__)
+config.init_logger()

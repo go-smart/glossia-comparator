@@ -36,8 +36,8 @@ class SQLiteSimulationDatabase:
         if should_create:
             self.create()
 
-    # Add the validation XML string to the simulation row
     def updateValidation(self, guid, validation_xml):
+        """Add the validation XML string to the simulation row."""
         cursor = self._db.cursor()
         cursor.execute('''
             UPDATE simulations
@@ -46,8 +46,8 @@ class SQLiteSimulationDatabase:
         ''', {'guid': guid, 'validation': validation_xml})
         self._db.commit()
 
-    # Return just the validation XML string for a simulation
     def getValidation(self, guid):
+        """Return just the validation XML string for a simulation."""
         cursor = self._db.cursor()
         cursor.execute('''
             SELECT validation
@@ -62,8 +62,8 @@ class SQLiteSimulationDatabase:
         validation = simulation_row[0]
         return validation
 
-    # Update the status of a simulation in the database
     def setStatus(self, guid, exit_code, status, percentage, timestamp):
+        """Update the status of a simulation in the database."""
         cursor = self._db.cursor()
         cursor.execute('''
             UPDATE simulations
@@ -72,8 +72,8 @@ class SQLiteSimulationDatabase:
             ''', {"guid": guid, "status": status, "percentage": percentage, "exit_code": exit_code, "timestamp": timestamp})
         self._db.commit()
 
-    # Return both status and validation
     def getStatusAndValidation(self, guid):
+        """Return both status and validation."""
         cursor = self._db.cursor()
         cursor.execute('''
             SELECT status, percentage, exit_code, timestamp, validation
@@ -88,8 +88,8 @@ class SQLiteSimulationDatabase:
         status, percentage, exit_code, timestamp, validation = simulation_row
         return percentage, status, exit_code, timestamp, validation
 
-    # Set up the database
     def create(self):
+        """Set up the database."""
         cursor = self._db.cursor()
         cursor.execute('''
             CREATE TABLE simulations(
@@ -107,8 +107,8 @@ class SQLiteSimulationDatabase:
         ''')
         self._db.commit()
 
-    # Update the simulation row or add a new one if not already here
     def addOrUpdate(self, simulation):
+        """Update the simulation row or add a new one if not already here."""
         try:
             cursor = self._db.cursor()
             cursor.execute('''
@@ -119,8 +119,8 @@ class SQLiteSimulationDatabase:
         except Exception:
             logging.exception("Problem inserting data into simulations")
 
-    # Mark simulations as exited if still appearing to run - usually on server start-up
     def markAllOld(self):
+        """Mark simulations as exited if still appearing to run - usually on server start-up."""
         cursor = self._db.cursor()
         cursor.execute('''
             UPDATE simulations
@@ -129,8 +129,8 @@ class SQLiteSimulationDatabase:
         ''')
         self._db.commit()
 
-    # Check how many simulations are still marked IN_PROGRESS
     def active_count(self):
+        """Check how many simulations are still marked IN_PROGRESS."""
         cursor = self._db.cursor()
         cursor.execute('''
             SELECT COUNT(id) as active
@@ -173,8 +173,8 @@ class SQLiteSimulationDatabase:
 
         return simulations
 
-    # Get a simulation by the client's GUID
     def retrieve(self, guid):
+        """Get a simulation by the client's GUID."""
         if len(guid) < 32:
             return self.search(guid)
 
@@ -201,6 +201,13 @@ class SQLiteSimulationDatabase:
         return GoSmartSimulationDefinition(guid, None, directory, None, finalized=True)
 
     def delete(self, simulation, soft=True):
+        """Remove a simulation from the database.
+
+        Args:
+            simulation (str): GUID of the simulation.
+            soft (Optional[bool]): do a soft delete.
+
+        """
         cursor = self._db.cursor()
         if soft:
             cursor.execute('''

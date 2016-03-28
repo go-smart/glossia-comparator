@@ -23,8 +23,8 @@ class HTTPTransferrer:
     def disconnect(self):
         logger.debug("Disconnecting")
 
-    # Uses downloadFile to pull
     def pull_files(self, files, root, remote_root):
+        """Uses downloadFile to pull."""
         for local, remote in files.items():
             remote_url = "%s/%s" % (self._url, remote)
             absolute_path = os.path.join(root, local)
@@ -36,21 +36,23 @@ class HTTPTransferrer:
 
             self.downloadFile(remote_url, absolute_path)
 
-    # Push using HTTP (unless we are told to use `tmp`)
     def push_files(self, files, root, remote_root):
+        """Push using HTTP (unless we are told to use `tmp`)."""
         for local, remote in files.items():
             absolute_path = os.path.join(root, local)
             logger.debug("Uploading from: " + absolute_path + " to:" + remote)
             self.uploadFile(absolute_path, remote)
 
-    # This just grabs using urllib GET
     def downloadFile(self, sourceUrlStr, destinationStr):
-        '''Downloads a file from the source URL to the destination (typically a folder)
+        """Downloads a file from the source URL to the destination (typically a folder).
 
-        Keyword arguments:
-        sourceUrlStr -- Url of the file which will be downloaded
-        destinationStr -- FullPath to the destination
-        '''
+        This just grabs using urllib GET.
+
+        Args:
+            sourceUrlStr: Url of the file which will be downloaded
+            destinationStr: FullPath to the destination
+
+        """
         if not os.path.exists(destinationStr):
             '''Check If we have downloaded the file already'''
             logger.debug("Download: " + sourceUrlStr + " to " + destinationStr)
@@ -65,14 +67,16 @@ class HTTPTransferrer:
             serverFile.close()
             localFile.close()
 
-    # This uploads with a POST
     def uploadFile(self, sourcePath, destinationUrl):
-        '''Uploads the file located in sourcePath to the destinationUrl
+        """Uploads the file located in sourcePath to the destinationUrl.
 
-        Keyword arguments:
-        sourcePath -- fullpath to the file which will be uploaded
-        destinationUrl -- Url where the file is send to
-        '''
+        This uploads with a POST.
+
+        Args:
+            sourcePath: fullpath to the file which will be uploaded
+            destinationUrl: Url where the file is send to
+
+        """
         logger.debug("upload " + sourcePath + " to " + destinationUrl)
         try:
             f = {'file': open(sourcePath, 'rb')}
@@ -86,8 +90,8 @@ class HTTPTransferrer:
         if (r.status_code != 200):
             logger.error("Upload Failed")
 
-    # The XML should indicate the source/destination URL
     def configure_from_xml(self, xml):
+        """The XML should indicate the source/destination URL."""
         self._url = xml.find("url").text
         self._output = xml.find("output")
         if self._output is not None:
