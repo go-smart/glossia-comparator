@@ -27,7 +27,7 @@ They can be defined in `GSSA-XML <../gssa-xml.md>`__, within the
 The ``ALGORITHMDEFINITION`` may be defined in any language the
 simulation family will understand (or, more accurately, the ultimate
 third-party simulation tool). Examples include MATC (for
-`GSSF <https://go-smart.github.io/gssf/overview/>`__) and Python (for
+`GSSF <https://go-smart.github.io/goosefoot/overview/>`__) and Python (for
 `FEniCS <../docker/fenics.md>`__). The ``RESULT`` is conventionally an
 upper-case, underscore-spaced slug that can be used in place of a
 conventional "constant" parameter. Arguments are specified solely by

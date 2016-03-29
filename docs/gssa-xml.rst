@@ -2,7 +2,7 @@ Go-Smart Simulation Architecture XML Format (GSSA-XML)
 ======================================================
 
 **Note**: this is distinct from
-`GSSF-XML <https://go-smart.github.io/gssf/xml/>`__.
+`GSSF-XML <https://go-smart.github.io/goosefoot/xml/>`__.
 
 GSSA-XML is documented as an XML Schema in the ``schema`` directory of
 the source tree. However, to provide a human-readable resource, it is

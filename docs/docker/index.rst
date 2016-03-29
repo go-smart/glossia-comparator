@@ -4,7 +4,7 @@ Go-Smart Simulation Architecture - Docker Workflows
 This workflow consists of a per-`family <../families.md>`_ Python module setting up
 configuration and a solver wrapped in a Docker image. Strictly, there are
 currently two Docker workflows: one entirely inside Docker and one using
-`GSSF <https://go-smart.github.io/gssf/mesher>`_ volumetric meshing prior to running a Docker instance.
+`GSSF <https://go-smart.github.io/goosefoot/mesher>`_ volumetric meshing prior to running a Docker instance.
 
 .. toctree::
      Python Container Module <container-module.md>
@@ -29,12 +29,12 @@ that the image must contain both a solver and a mesher (if meshing is required).
 Docker+CGAL Workflow
 ++++++++++++++++++++
 
-This hybrid scheme configures the `GSSF mesher <https://go-smart.github.io/gssf/mesher/>`_ as would be the
-case in `GSSF <https://go-smart.github.io/gssf/overview/>`_, but stops after the volumetric
-(`CGAL <https://go-smart.github.io/gssf/tools/mesher-cgal/>`_) meshing step. This `MSH <http://gmsh.info>`_ file is
+This hybrid scheme configures the `GSSF mesher <https://go-smart.github.io/goosefoot/mesher/>`_ as would be the
+case in `GSSF <https://go-smart.github.io/goosefoot/overview/>`_, but stops after the volumetric
+(`CGAL <https://go-smart.github.io/goosefoot/tools/mesher-cgal/>`_) meshing step. This `MSH <http://gmsh.info>`_ file is
 provided as input to a simulation-only Docker instance. Combining these is
 achieved by use of a family mixin, a module that generates only
-`mesher-cgal <https://go-smart.github.io/gssf/mesher/>`_ relevant parts of `GSSF-XML <https://go-smart.github.io/gssf/xml/>`_,
+`mesher-cgal <https://go-smart.github.io/goosefoot/mesher/>`_ relevant parts of `GSSF-XML <https://go-smart.github.io/goosefoot/xml/>`_,
 `gssa.families.mesher_gssf.MesherGSSFMixin`.
 This is included into, for instance, ``gssa.families.fenics.FenicsFamily``. (In
 fact, the same mix-in is used by GSSF itself for meshing configuration).

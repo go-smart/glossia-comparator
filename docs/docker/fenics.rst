@@ -4,7 +4,7 @@ Go-Smart Simulation Architecture - FEniCS Family
 This is a family within the `Docker+CGAL
 workflow <overview.md#dockercgal-workflow>`__, incorporating meshing
 from
-`mesher-cgal <https://go-smart.github.io/gssf/tools/mesher-cgal/>`__ and
+`mesher-cgal <https://go-smart.github.io/goosefoot/tools/mesher-cgal/>`__ and
 simulation provided by `FEniCS <http://fenicsproject.org/>`__. FEniCS is
 a general-purpose finite element framework, capable of automated
 solution of PDEs.
