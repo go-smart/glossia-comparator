@@ -8,7 +8,7 @@ GSSA-XML is documented as an XML Schema in the ``schema`` directory of
 the source tree. However, to provide a human-readable resource, it is
 described also here:
 
-.. code:: xml
+.. code-block:: xml
 
     <simulationDefinition>
         <transferrer class="(http|tmp)">
@@ -34,11 +34,12 @@ described also here:
                     input="RINPUT" groups="RGROUPS" />
                 ...
             </regions>
-            <definition name="DFAMILY" [ file="DFILE" ]>
+            <definition name="DFAMILY" file="[ DFILE ]">
                 <!-- Family-specific content (see documentation for each family) -->
             </definition>
         </numericalModel>
     </simulationDefinition>
+
 
 The needle index, ``NIX``, indicates the name by which this needle
 should be referred to. They should be integers, ordering the needles

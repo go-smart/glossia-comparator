@@ -92,7 +92,7 @@ the `simulation server <../server/overview.md>`__.
 The Concrete Parameters for a simulation appear in the
 `GSSA-XML <../gssa-xml.md>`__ in the following format:
 
-.. code:: xml
+.. code-block:: xml
 
     <parameters>
         <parameter name="PARAMNAME" value="PARAMATTRVALUE" type="PARAMATTRTYPE" />

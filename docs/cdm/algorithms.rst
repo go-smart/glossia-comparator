@@ -13,7 +13,7 @@ Definition
 They can be defined in `GSSA-XML <../gssa-xml.md>`__, within the
 ``<algorithms />`` node as follows:
 
-.. code:: xml
+.. code-block:: xml
 
         <algorithm result="RESULT">
             <arguments>

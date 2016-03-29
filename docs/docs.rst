@@ -7,7 +7,7 @@ as are any docstrings.
 
 To regenerate and upload a new documentation version:
 
-.. code:: sh
+.. code-block:: sh
 
     cd docs/
     make apidocs

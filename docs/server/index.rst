@@ -121,4 +121,4 @@ Concurrency
 As much as possible, any asynchronous behaviour has been mediated by
 `asyncio <https://docs.python.org/3/library/asyncio.html>`_
 using *coroutines* from the main thread. This includes simulation, meshing, WAMP
-i
+interactions, socket handling, database interaction and file transfers.

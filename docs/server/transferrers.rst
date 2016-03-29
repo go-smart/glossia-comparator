@@ -20,7 +20,7 @@ Configuration
 
 The ``HTTPTransferrer`` class is configured as follows:
 
-.. code:: xml
+.. code-block:: xml
 
         <transferrer method="http">
             <url>SOURCEURL</url>
@@ -42,7 +42,7 @@ Configuration
 
 The ``TmpTransferrer`` class is configured as follows:
 
-.. code:: xml
+.. code-block:: xml
 
         <transferrer method="tmp">
             <input location="LOCATION" />
