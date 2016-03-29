@@ -20,7 +20,7 @@ Contents:
    Clinical Domain Model <cdm/index.rst>
    Server <server/index.rst>
    Docker Workflows <docker/index.rst>
-   API <api/modules.rst>
+   Code <api/modules.rst>
    Documentation <docs.md>
 
 
