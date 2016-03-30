@@ -45,3 +45,7 @@ Simulation container images may be pulled in using the command:
     sudo docker pull gosmart/glossia-goosefoot
 
 Other publicly available images include ``gosmart/glossia-fenics``.
+Glossia does not need to be restarted to use these images - as long
+as Glossia has the relevant family built in and dockerlaunch has the image
+whitelisted, any subsequent GSSA-XML definitions using the image
+should run as normal.

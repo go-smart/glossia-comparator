@@ -11,7 +11,7 @@ Go-Smart Simulation Architecture (aka. GSSA)
 Glossia is a standalone set of tools for simulation orchestration, allowing remote control of
 computational numerics software in Docker containers. It is administrated via WAMP and
 simulations are configured using `GSSA-XML <reference/gssa-xml.rst>`_, a conceptual description
-format allowing easy interchange of physical model components around a numerical model.
+format facilitating easy interchange of physical model components around a numerical model.
 
 The framework is used to provide a simulation backend for the `Go-Smart <http://smart-mict.eu/>`_
 web-based Minimally Invasive Cancer Treatment (MICT) platform. Using this technology, researchers

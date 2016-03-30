@@ -1,30 +1,30 @@
-Glossia (aka. GSSA)
-===================
+Glossia
+=======
 
-The Go-Smart Simulation Architecture
-------------------------------------
+Go-Smart Simulation Architecture (aka. GSSA)
+--------------------------------------------
 
-**Primary authors** : [NUMA Engineering Services
-Ltd](http://www.numa.ie) (NUMA), Dundalk, Ireland
+Glossia is a standalone set of tools for simulation orchestration, allowing remote control of
+computational numerics software in Docker containers. It is administrated via WAMP and
+simulations are configured using [GSSA-XML](reference/gssa-xml.rst), a conceptual description
+format facilitating easy interchange of physical model components around a numerical model.
 
-**Project website** : <http://www.gosmart-project.eu/>
+The framework is used to provide a simulation backend for the [Go-Smart](http://smart-mict.eu/)
+web-based Minimally Invasive Cancer Treatment (MICT) platform. Using this technology, researchers
+and technicians can dynamically alter simulation strategies and equipment/physical parameters
+through the web-interface.
 
-This project is co-funded by: European Commission under grant agreement
-no. 600641.
+While existing technologies allow hypermodel modification through
+tools such as [Apache Taverna](http://incubator.apache.org/projects/taverna.html), Go-Smart, through
+Glossia, is unusual in that it provides interactive support for collaborative simulation at a
+hypomodel level. At present, this is tested within a small number of frameworks (corresponding
+to container images) including Python/Numpy/[FEniCS](https://fenicsproject.org) and
+[Elmer](https://www.csc.fi/web/elmer).
 
-This tool, GSSA, provides scripts for running a generic simulation
-server, with support for Docker-based webuser-configurable simulation
-tools, and the configuration for the [Crossbar.io](https://crossbar.io)
-WAMP router.
+- **Primary authors** : [NUMA Engineering Services Ltd](http://www.numa.ie>) (NUMA), Dundalk, Ireland
+- **Project website** : [http://www.gosmart-project.eu/](http://www.gosmart-project.eu/)
 
-Dependencies
-------------
-
--   Python 3
--   Crossbar.io
--   libjsoncpp-dev
--   (Python 3) munkres pyyaml crossbar docker
--   (Python 2) hachiko paramiko
+This project is co-funded by the European Commission under grant agreement no. 600641.
 
 Documentation
 -------------
