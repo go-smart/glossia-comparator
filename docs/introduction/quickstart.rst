@@ -34,3 +34,14 @@ local machine at port 8080.
 **You should ensure that only authorized clients may access the
 router port.** Moreover, note that WAMP traffic and responses
 are not secure between clients attached to the same WAMP router.
+
+Adding simulation containers
+----------------------------
+
+Simulation container images may be pulled in using the command:
+
+.. code-block:: bash
+
+    sudo docker pull gosmart/glossia-goosefoot
+
+Other publicly available images include ``gosmart/glossia-fenics``.
