@@ -8,22 +8,38 @@ Glossia
 Go-Smart Simulation Architecture (aka. GSSA)
 --------------------------------------------
 
-Contents:
+Glossia is a standalone set of tools for simulation orchestration, allowing remote control of
+computational numerics software in Docker containers. It is administrated via WAMP and
+simulations are configured using `GSSA-XML <reference/gssa-xml.rst>`_, a conceptual description
+format allowing easy interchange of physical model components around a numerical model.
+
+The framework is used to provide a simulation backend for the `Go-Smart <http://smart-mict.eu/>`_
+web-based Minimally Invasive Cancer Treatment (MICT) platform. Using this technology, researchers
+and technicians can dynamically alter simulation strategies and equipment/physical parameters
+through the web-interface.
+
+While existing technologies allow hypermodel modification through
+tools such as `Apache Taverna <http://incubator.apache.org/projects/taverna.html>`_, Go-Smart, through
+Glossia, is unusual in that it provides interactive support for collaborative simulation at a
+hypomodel level. At present, this is tested within a small number of frameworks (corresponding
+to container images) including Python/Numpy/`FEniCS <https://fenicsproject.org>`_ and
+`Elmer <https://www.csc.fi/web/elmer>`_.
+
+| **Primary authors** : `NUMA Engineering Services Ltd <http://www.numa.ie>`_ (NUMA), Dundalk, Ireland
+| **Project website** : `http://www.gosmart-project.eu/ <http://www.gosmart-project.eu/>`_
+
+This project is co-funded by the European Commission under grant agreement no. 600641.
+
+
+Contents
+========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   Comparison <comparison.md>
-   Errors <errors.rst>
-   GSSA XML Format <gssa-xml.md>
-   Families<families.md>
-   Clinical Domain Model <cdm/index.rst>
-   Server <server/index.rst>
-   Docker Workflows <docker/index.rst>
-   Code <api/modules.rst>
-   Documentation <docs.md>
-
-
+   Home <self>
+   Introduction <introduction/index.rst>
+   Reference <reference/index.rst>
 
 Indices and tables
 ==================
@@ -33,38 +49,3 @@ Indices and tables
 * :ref:`search`
 
 
-| **Primary authors** : `NUMA Engineering Services Ltd <http://www.numa.ie>`_ (NUMA), Dundalk, Ireland
-| **Project website** : `http://www.gosmart-project.eu/ <http://www.gosmart-project.eu/>`_
-
-This project is co-funded by the European Commission under grant agreement no. 600641.
-
-This tool, GSSA, provides scripts for running a generic simulation server, with support for Docker-based webuser-configurable simulation tools, and the configuration for the `Crossbar.io <https://crossbar.io>`_ WAMP router.
-
-Dependencies
-------------
-
-* Python 2.7
-* Python 3
-* `Elmer (with NUMA modifications) <https://github.com/go-smart/gssf-elmer>`_
-* GMSH
-* VTK 5.8
-* libjsoncpp-dev
-* (Python 3) munkres pyyaml
-* (Python 2) PythonOCC
-
-Installation
-------------
-
-CMake installation is recommended from an out-of-source build directory.
-
-Usage
------
-
-The simulation workflow may be launched by the command
-
-.. code-block:: sh
-
-  go-smart-launcher settings.xml
-..
-
-where `settings.xml` is a GSSF-XML file. Adding --help will show documentation of command line arguments.
