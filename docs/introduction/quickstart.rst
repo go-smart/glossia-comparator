@@ -6,10 +6,18 @@ process, with access to the host's Docker daemon only via
 the `dockerlaunch <https://go-smart.github.io/dockerlaunch>`_
 system.
 
-First, install and start dockerlaunch
-(`installation guide <https://go-smart.github.io/dockerlaunch/installation>`_).
+Dependencies
+------------
 
-The Glossia server may be launched in only a few commands:
+- dockerlaunch
+  (`installation guide <https://go-smart.github.io/dockerlaunch/installation>`_)
+- docker-compose (``sudo pip install docker-compose``)
+
+
+Execution
+---------
+
+The Glossia server may be launched as follows:
 
 .. code-block:: bash
 
@@ -21,3 +29,7 @@ The Glossia server may be launched in only a few commands:
 This will start both a WAMP router and a Docker instance connected
 to it. Any client supporting Glossia may connect to it on your
 local machine at port 8080.
+
+**You should ensure that only authorized clients may access the
+router port.** Moreover, note that WAMP traffic and responses
+are not secure between clients attached to the same WAMP router.
