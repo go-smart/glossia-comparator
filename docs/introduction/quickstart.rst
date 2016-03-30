@@ -11,6 +11,7 @@ Dependencies
 
 - dockerlaunch
   (`installation guide <https://go-smart.github.io/dockerlaunch/installation>`_)
+- pip (Ubuntu: ``sudo apt-get install python-pip``)
 - docker-compose (``sudo pip install docker-compose``)
 
 
@@ -21,7 +22,7 @@ The Glossia server may be launched as follows:
 
 .. code-block:: bash
 
-    git clone https://github.io/go-smart/glossia-server-side
+    git clone https://github.com/go-smart/glossia-server-side
     cd glossia-server-side
     sudo ./setup.sh
     sudo ./start-local.sh
