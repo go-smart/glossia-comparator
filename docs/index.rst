@@ -35,7 +35,6 @@ the `Go-Smart Web Framework <https://smart-mict.eu/>`_.
 
 This project is co-funded by the European Commission under grant agreement no. 600641.
 
-
 Contents
 ========
 
@@ -45,6 +44,7 @@ Contents
    Home <self>
    Introduction <introduction/index.rst>
    Reference <reference/index.rst>
+   <license>
 
 Indices and tables
 ==================
