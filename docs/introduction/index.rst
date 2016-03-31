@@ -2,7 +2,7 @@ Introduction
 ============
 
 Glossia provides simulation orchestration - that is, it allows a WAMP client to send new simulations,
-defined in the `GSSA-XML <../reference/gssa-xml.rst>`_ format, then monitor progress, cancel or retrieve diagnostic
+defined in the `GSSA-XML <../reference/gssa-xml>`_ format, then monitor progress, cancel or retrieve diagnostic
 data from these simulations. The `GSSA-XML`_ format is designed to abstract parameters from a numerical model,
 and allow simple interchange of both models, parameters and input data such as geometric information.
 

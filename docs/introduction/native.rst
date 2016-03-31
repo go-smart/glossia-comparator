@@ -3,7 +3,7 @@ Native Installation
 
 In general, it is recommended to use Glossia within a Docker container
 and it has been designed with this usage in mind.
-See the `Quickstart <quickstart.rst>`_ documentation for further detail.
+See the `Quickstart <quickstart>`_ documentation for further detail.
 However, if you do want to install Glossia separately on a host, for
 development or testing, these instructions apply. If you have difficulty
 you may still find comparing with the Dockerfile useful, as it

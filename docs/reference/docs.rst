@@ -2,7 +2,7 @@ Documentation workflow
 ======================
 
 This documentation is created primarily using Markdown, for simplicity,
-but using Sphinx. As such, ``index.rst`` files are in reStructuredText,
+but using Sphinx. As such, ``index`` files are in reStructuredText,
 as are any docstrings.
 
 To regenerate and upload a new documentation version:

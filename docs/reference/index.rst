@@ -4,14 +4,14 @@ Reference
 .. toctree::
    :maxdepth: 2
 
-   Comparison <comparison.rst>
-   Errors <errors.rst>
-   GSSA XML Format <gssa-xml.rst>
-   Families <families.rst>
-   Clinical Domain Model <cdm/index.rst>
-   Server <server/index.rst>
-   Docker Workflows <docker/index.rst>
-   Code <api/modules.rst>
-   Documentation <docs.rst>
+   Comparison <comparison>
+   Errors <errors>
+   GSSA XML Format <gssa-xml>
+   Families <families>
+   Clinical Domain Model <cdm/index>
+   Server <server/index>
+   Docker Workflows <docker/index>
+   Code <api/modules>
+   Documentation <docs>
 
 
