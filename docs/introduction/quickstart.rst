@@ -44,8 +44,33 @@ Simulation container images may be pulled in using the command:
 
     sudo docker pull gosmart/glossia-goosefoot
 
-Other publicly available images include ``gosmart/glossia-fenics``.
+This enables the `Goosefoot <https://go-smart.github.io/goosefoot>`_
+family workflow, wrapping `CGAL <http://www.cgal.org/>`_
+and the `Elmer <https://www.csc.fi/web/elmer>`_ solver.
+
+Another available image is ``gosmart/glossia-fenics``,
+wrapping the `FEniCS <https://fenicsproject.org>`_ libraries.
+This package is very well-suited to Glossia usage, and adapting
+FEniCS Python codes to Glossia is especially straightforward.
+
 Glossia does not need to be restarted to use these images - as long
 as Glossia has the relevant family built in and dockerlaunch has the image
 whitelisted, any subsequent GSSA-XML definitions using the image
 should run as normal.
+
+Interaction
+-----------
+
+The current stable Glossia clients are `Glot <https://go-smart.github.io/glot>`_ and
+the `Go-Smart Web Framework <https://smart-mict.eu/>`_. Glot is the core
+technology for simulation developer use and testing, and is intended
+to be comprehensive.
+An open source, proof-of-concept
+web-based management tool also exists, but should not be considered
+ready for use.
+
+If you would be
+interested in using the radiological interface for your own projects,
+or sponsoring development of the developer-friendly open source simulation
+management tool,
+please contact the `Go-Smart Consortium <https://gosmart-project.eu/>`_.
