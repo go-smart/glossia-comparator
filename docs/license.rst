@@ -35,5 +35,5 @@ Python glue modules (families) operating within the Glossia server *are* subject
 
 Numerical Model configuration and code contained within GSSA-XML, passed directly from the client to the
 simulation container (via Glossia), is not normally affected by licensing of Glossia. Within the default
-set-up of the ``gosmart/glossia-goosefoot``, SIF templates and MATC algorithms passed to Glossia in GSSA-XML
-are not affected by AGPLv3 licensing of Goosefoot.
+set-up of the ``gosmart/glossia-goosefoot`` container image, SIF templates and MATC algorithms passed to
+Glossia in GSSA-XML are not affected by AGPLv3 licensing of Goosefoot.

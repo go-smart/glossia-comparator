@@ -44,7 +44,7 @@ Contents
    Home <self>
    Introduction <introduction/index.rst>
    Reference <reference/index.rst>
-   <license>
+   Licensing <license.rst>
 
 Indices and tables
 ==================
