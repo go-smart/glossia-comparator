@@ -52,9 +52,14 @@ class DockerFamily(Family):
     def simulate(self, working_directory):
         proceed = yield from self.prepare_simulation(working_directory)
 
+        if not proceed:
+            logging.warn("Prepare simulation told us not to proceed")
+            return False
+
         update_socket = self.get_percentage_socket_location(working_directory)
         os.chmod(update_socket, 0o777)
         self._submitter.set_update_socket(update_socket)
+        logging.debug("Set update socket")
 
         regions_yaml = os.path.join(working_directory, "input", "regions.yml")
         regions = self._regions
@@ -62,6 +67,7 @@ class DockerFamily(Family):
             yaml.dump(regions, f, default_flow_style=False)
 
         self._submitter.add_input(regions_yaml)
+        logging.debug("Wrote regions.yml")
 
         parameters_yaml = os.path.join(working_directory, "input", "parameters.yml")
         parameters = self._parameters
@@ -73,6 +79,7 @@ class DockerFamily(Family):
             yaml.dump(parameters, f, default_flow_style=False)
 
         self._submitter.add_input(parameters_yaml)
+        logging.debug("Wrote parameters.yml")
 
         needle_parameters_yaml = os.path.join(working_directory, "input", "needle_parameters.yml")
 
@@ -86,9 +93,7 @@ class DockerFamily(Family):
         with open(needle_parameters_yaml, "w") as f:
             yaml.dump_all(self._needles.values(), f, default_flow_style=False)
         self._submitter.add_input(needle_parameters_yaml)
-
-        if not proceed:
-            return False
+        logging.debug("Wrote needle_parameters.yml")
 
         definition_tar = os.path.join("input", "start.tar.gz")
         self._submitter.add_input(os.path.join(working_directory, definition_tar))
@@ -112,6 +117,7 @@ class DockerFamily(Family):
                 tar.addfile(tarinfo=info, fileobj=stringio)
 
             tar.close()
+            logging.debug("Created definition tarball")
 
         # Need to make sure this is last uploaded
         if definition_tar in self._files_required:
@@ -120,6 +126,7 @@ class DockerFamily(Family):
 
         loop = asyncio.get_event_loop()
         try:
+            logging.debug("Submitting")
             outcome = yield from self._submitter.run_script(
                 loop,
                 working_directory,
@@ -130,6 +137,7 @@ class DockerFamily(Family):
             logging.debug("DONE")
         except gssa.error.ErrorException as e:
             outcome = e.get_error()
+            logging.debug("Failed [%s]" % str(e))
 
         return outcome
 

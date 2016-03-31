@@ -45,15 +45,12 @@ class MesherGSSFMixin:
         input_msh = os.path.join(working_directory, "input", "input.msh")
         labelling_yaml = os.path.join(working_directory, "input", "mesh_labelling.yml")
 
-        success = False
-
         # If we have an uploaded MSH, often used for testing, skip the meshing
         # section
         uploaded_msh = os.path.join(working_directory, "input", "mesh-0.msh")
         if os.path.exists(uploaded_msh):
             shutil.copyfile(uploaded_msh, input_msh)
             logging.info("Found uploaded msh")
-            success = True
 
         # If we do not, then prepare the mesher-cgal configuration
         if not os.path.exists(input_msh):
@@ -97,7 +94,7 @@ class MesherGSSFMixin:
 
         #self._files_required["input.msh"] = input_msh
 
-        return success
+        return True
 
     # Use the GSSA-XML to produce only the meshing-relevant parts (most of)
     # GSSF-XML

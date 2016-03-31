@@ -33,8 +33,8 @@ from . import family as families
 import lxml.etree
 
 
-# Routines for working with a single specific simulation
 class GoSmartSimulationDefinition:
+    """Routines for working with a single specific simulation."""
     _guid = None
     _dir = None
     _remote_dir = ''
