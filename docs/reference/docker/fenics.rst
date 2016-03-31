@@ -2,7 +2,7 @@ Go-Smart Simulation Architecture - FEniCS Family
 ================================================
 
 This is a family within the `Docker+CGAL
-workflow <overview.md#dockercgal-workflow>`__, incorporating meshing
+workflow <index#dockercgal-workflow>`__, incorporating meshing
 from
 `mesher-cgal <https://go-smart.github.io/goosefoot/tools/mesher-cgal/>`__ and
 simulation provided by `FEniCS <http://fenicsproject.org/>`__. FEniCS is

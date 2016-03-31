@@ -96,7 +96,7 @@ Description
 ~~~~~~~~~~~
 
 The client takes all of the definition files and wraps them in a TAR.GZ
-file, referencing it in the `GSSA-XML <../gssa-xml.md>`__ file. It also
+file, referencing it in the `GSSA-XML <../gssa-xml>`__ file. It also
 wraps the input surfaces in a TAR.GZ file and adds it to a
 ``tmp``-transferrer node (expected for these local client-server
 interactions).

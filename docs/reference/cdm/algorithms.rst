@@ -1,7 +1,7 @@
 Go-Smart Simulation Algorithms
 ==============================
 
-These are members of the `CDM <overview.md>`__ that provide something
+These are members of the `CDM <index>`__ that provide something
 akin to lambda calculus to Go-Smart. They are database defined, have
 textual body in an unspecified language, return a parameter as a
 *Result* and take named arguments that must be supplied by the numerical
@@ -10,7 +10,7 @@ model as a condition of forming a valid *Combination*.
 Definition
 ----------
 
-They can be defined in `GSSA-XML <../gssa-xml.md>`__, within the
+They can be defined in `GSSA-XML <../gssa-xml>`__, within the
 ``<algorithms />`` node as follows:
 
 .. code-block:: xml
@@ -28,7 +28,7 @@ The ``ALGORITHMDEFINITION`` may be defined in any language the
 simulation family will understand (or, more accurately, the ultimate
 third-party simulation tool). Examples include MATC (for
 `GSSF <https://go-smart.github.io/goosefoot/overview/>`__) and Python (for
-`FEniCS <../docker/fenics.md>`__). The ``RESULT`` is conventionally an
+`FEniCS <../docker/fenics>`__). The ``RESULT`` is conventionally an
 upper-case, underscore-spaced slug that can be used in place of a
 conventional "constant" parameter. Arguments are specified solely by
 name, not type (as we do not even know the applicable language). They

@@ -1,21 +1,21 @@
 Go-Smart Simulation Architecture - Docker Workflows
 ===================================================
 
-This workflow consists of a per-`family <../families.md>`_ Python module setting up
+This workflow consists of a per-`family <../families>`_ Python module setting up
 configuration and a solver wrapped in a Docker image. Strictly, there are
 currently two Docker workflows: one entirely inside Docker and one using
 `GSSF <https://go-smart.github.io/goosefoot/mesher>`__ volumetric meshing prior to running a Docker instance.
 
 .. toctree::
-     Python Container Module <container-module.md>
-     FEniCS Family <fenics.md>
+     Python Container Module <container-module>
+     FEniCS Family <fenics>
 
 Definition
 ----------
 
 Definitions for families in this workflow should include a ``start.py`` file. This
 will be called with Python in an environment containing the
-`Python container module <container-module.md>`_.
+`Python container module <container-module>`_.
 
 Variants
 --------

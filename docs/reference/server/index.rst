@@ -8,9 +8,9 @@ correlation between servers and processes.
 
 Each server should have a unique ID (by default, a UUID). This may persist
 through restarts by passing it as an argument to
-`go-smart-simulation-server <executables.md#go-smart-simulation-server>`_, the
+`go-smart-simulation-server <executables#go-smart-simulation-server>`_, the
 entry-point for the simulation server. This also refers to the server-side
-simulation `database <database.md>`_ and re-using the ID will allow the simulation
+simulation `database <database>`_ and re-using the ID will allow the simulation
 to maintain awareness of pre-existing simulations after restart.
 
 The server is controlled via WAMP calls and, to enable discovery, is subscribed to
@@ -25,16 +25,16 @@ However, this has not been fully tested, and is not part of our current use case
 it will be more extensively documented when proved reliable.
 
 .. toctree::
-     Router <router.md>
-     Executables <executables.md>
-     Database <database.md>
-     Transferrers <transferrers.md>
+     Router <router>
+     Executables <executables>
+     Database <database>
+     Transferrers <transferrers>
 
 Controlling the server
 ----------------------
 
 The simulation server is controlled via WAMP. This requires a [WAMP
-router](router.md), to which the server and client both connect.
+router](router), to which the server and client both connect.
 `WAMP <http://wamp-proto.org/>`_ is a
 protocol providing RPC (remote procedure call) and Pub-Sub
 (publisher-subscriber) support. Both communication patterns are used by the
@@ -48,7 +48,7 @@ On start-up, the server registers a series of RPC methods:
 - ``com.gosmartsimulation.[ID].start(GUID)``
    -  Begin simulating simulation with given GUID
 - ``com.gosmartsimulation.[ID].update_settings_xml(GUID, XML)``
-   -  Load the passed XML string as `GSSA-XML <../gssa-xml.md>`_ for this simulation
+   -  Load the passed XML string as `GSSA-XML <../gssa-xml>`_ for this simulation
 - ``com.gosmartsimulation.[ID].update_files(GUID, FILES)``
    -  Add the passed files map (basenames to remote locations relative to the transferrer) to the simulation's input file map
 - ``com.gosmartsimulation.[ID].request_files(GUID, FILES)``
@@ -102,7 +102,7 @@ events:
    -  Indicates a simulation failure. Arguments: *(simulation_id, (percentage, PROGRESS_STATUS), working_directory, timestamp, validation_xml)*
 
 Note that, with RPC calls, the server is configured to forward exceptions back
-to the client. In general, these should be `errors <../errors.md>`_ defined for GSSA,
+to the client. In general, these should be `errors <../errors>`_ defined for GSSA,
 but your client should recognise the possibility that they are unhandled
 server-side errors and catch accordingly. If not a ``GoSmartError``, this would indicate a bug-report
 should be filed against GSSA.

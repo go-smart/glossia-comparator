@@ -7,13 +7,13 @@ slightly more specific than a workflow as, for example, the Docker
 workflow has a separate family for each Docker image. It corresponds
 more accurately to a single configuration system. This comprises a pair:
 a subclass of ``gssa.family.Family`` that contains instructions for
-interpreting `GSSA-XML <gssa-xml.md>`__ for this type of simulation and
+interpreting `GSSA-XML <gssa-xml>`__ for this type of simulation and
 writing any necessary tool-specific configuration files, and the
 simulation tools themselves.
 
 Two examples are `GSSF <https://go-smart.github.io/goosefoot/overview/>`__,
 which is also a fully fledged workflow, and
-`FEniCS <docker/fenics.md>`__, which depends on pre-meshing by the `GSSF
+`FEniCS <docker/fenics>`__, which depends on pre-meshing by the `GSSF
 CGAL mesher component <https://go-smart.github.io/goosefoot/mesher/>`__.
 
 To find families, the ``gssa.family`` module scans for files in the

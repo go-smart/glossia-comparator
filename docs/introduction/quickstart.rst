@@ -49,7 +49,7 @@ family workflow, wrapping `CGAL <http://www.cgal.org/>`_
 and the `Elmer <https://www.csc.fi/web/elmer>`_ solver.
 
 Another available image is ``gosmart/glossia-fenics``,
-wrapping the `FEniCS <https://fenicsproject.org>`_ libraries.
+wrapping the `FEniCS <http://fenicsproject.org>`_ libraries.
 This package is very well-suited to Glossia usage, and adapting
 FEniCS Python codes to Glossia is especially straightforward.
 

@@ -5,7 +5,7 @@ By default, the GSSA server will create an [SQLite](https://www.sqlite.org/)
 database to record past and present simulations, and their statuses. It is
 specific to a server ID, so you can effectively resume a server by passing the
 same ID to
-`go-smart-simulation-server <executables.md#go-smart-simulation-server>`_.
+`go-smart-simulation-server <executables#go-smart-simulation-server>`_.
 
 The database records the following information:
 
@@ -18,7 +18,7 @@ The database records the following information:
 +------------+------------+-------------------------------------------------------------+
 | directory  | text       | Location of the simulation's (last known) working directory |
 +------------+------------+-------------------------------------------------------------+
-| exit_code  | text(null) | `Error <../errors.md>`_ code on simulation exit             |
+| exit_code  | text(null) | `Error <../errors>`_ code on simulation exit             |
 +------------+------------+-------------------------------------------------------------+
 | status     | text       | Last status update from the simulation                      |
 +------------+------------+-------------------------------------------------------------+
