@@ -73,4 +73,4 @@ If you would be
 interested in using the radiological interface for your own projects,
 or sponsoring development of the developer-friendly open source simulation
 management tool,
-please contact the `Go-Smart Consortium <https://gosmart-project.eu/>`_.
+please contact the `Go-Smart Consortium <http://gosmart-project.eu/>`_.

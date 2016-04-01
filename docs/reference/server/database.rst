@@ -18,7 +18,7 @@ The database records the following information:
 +------------+------------+-------------------------------------------------------------+
 | directory  | text       | Location of the simulation's (last known) working directory |
 +------------+------------+-------------------------------------------------------------+
-| exit_code  | text(null) | `Error <../errors>`_ code on simulation exit             |
+| exit_code  | text(null) | `Error <../errors>`_ code on simulation exit                |
 +------------+------------+-------------------------------------------------------------+
 | status     | text       | Last status update from the simulation                      |
 +------------+------------+-------------------------------------------------------------+

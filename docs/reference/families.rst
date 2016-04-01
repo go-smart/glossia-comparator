@@ -14,7 +14,7 @@ simulation tools themselves.
 Two examples are `GSSF <https://go-smart.github.io/goosefoot/overview/>`__,
 which is also a fully fledged workflow, and
 `FEniCS <docker/fenics>`__, which depends on pre-meshing by the `GSSF
-CGAL mesher component <https://go-smart.github.io/goosefoot/mesher/>`__.
+CGAL mesher component <https://go-smart.github.io/goosefoot-mesher-cgal/>`__.
 
 To find families, the ``gssa.family`` module scans for files in the
 directory of the ``gssa.families`` module.

@@ -4,7 +4,7 @@ Go-Smart Simulation Architecture - Docker Workflows
 This workflow consists of a per-`family <../families>`_ Python module setting up
 configuration and a solver wrapped in a Docker image. Strictly, there are
 currently two Docker workflows: one entirely inside Docker and one using
-`GSSF <https://go-smart.github.io/goosefoot/mesher>`__ volumetric meshing prior to running a Docker instance.
+`GSSF <https://go-smart.github.io/goosefoot-mesher-cgal/>`__ volumetric meshing prior to running a Docker instance.
 
 .. toctree::
      Python Container Module <container-module>
@@ -29,12 +29,12 @@ that the image must contain both a solver and a mesher (if meshing is required).
 Docker+CGAL Workflow
 ++++++++++++++++++++
 
-This hybrid scheme configures the `GSSF mesher <https://go-smart.github.io/goosefoot/mesher/>`_ as would be the
+This hybrid scheme configures the `GSSF mesher <https://go-smart.github.io/goosefoot-mesher-cgal/>`_ as would be the
 case in `GSSF <https://go-smart.github.io/goosefoot/overview/>`__, but stops after the volumetric
-(`CGAL <https://go-smart.github.io/goosefoot/tools/mesher-cgal/>`_) meshing step. This `MSH <http://gmsh.info>`_ file is
+(`CGAL <http://www.cgal.org/>`_) meshing step. This `MSH <http://gmsh.info>`_ file is
 provided as input to a simulation-only Docker instance. Combining these is
 achieved by use of a family mixin, a module that generates only
-`mesher-cgal <https://go-smart.github.io/goosefoot/mesher/>`_ relevant parts of `GSSF-XML <https://go-smart.github.io/goosefoot/xml/>`_,
+`mesher-cgal <https://go-smart.github.io/goosefoot-mesher-cgal/>`_ relevant parts of `GSSF-XML <https://go-smart.github.io/goosefoot/xml/>`_,
 `gssa.families.mesher_gssf.MesherGSSFMixin`.
 This is included into, for instance, ``gssa.families.fenics.FenicsFamily``. (In
 fact, the same mix-in is used by GSSF itself for meshing configuration).
@@ -42,10 +42,10 @@ fact, the same mix-in is used by GSSF itself for meshing configuration).
 Caveats
 -------
 
-This workflow uses the `dockerlaunch <https://github.io/go-smart/dockerlaunch>`_ daemon to orchestrate
+This workflow uses the `dockerlaunch <https://go-smart.github.io/dockerlaunch>`_ daemon to orchestrate
 containers while minimizing exposure of control. It must be installed and running on the host
 for simulation containers to be launched by the Glossia container.
-While containerized Glossia is not essential, the `exemplar setup <https://github.io/go-smart/glossia-server-side>`_
+While containerized Glossia is not essential, the `exemplar setup <https://github.com/go-smart/glossia-server-side>`_
 mounts the ``dockerlaunch`` socket to a known location in the Glossia container and ensures that the
 internal user is in the ``dockerlaunch`` group necessary for socket access. This is in lieu of stable
 user namespacing in Docker, and will be updated as this becomes standard.
