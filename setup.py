@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-setup(name='Go-Smart Simulation Comparator',
+setup(name='glossia.comparator',
       version='0.1',
       packages=['glossia.comparator'],
 
