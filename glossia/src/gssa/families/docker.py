@@ -155,6 +155,15 @@ class DockerFamily(Family):
             logging.debug(self._submitter.copy_output(f, destination))
 
     @asyncio.coroutine
+    def logs(self, only=None):
+        logs = yield from self._submitter.logs(only)
+
+        if only is not None:
+            return {only: logs[only]} if only in logs else {}
+
+        return logs
+
+    @asyncio.coroutine
     def cancel(self):
         success = yield from self._submitter.cancel()
         return success

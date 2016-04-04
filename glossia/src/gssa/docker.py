@@ -44,14 +44,14 @@ class Submitter:
     _cancelled = False
     _destroyed = False
     _socket_location = None
-    _cancellation_lock = None
+    _communication_lock = None
 
     def __init__(self):
         self._input_files = []
         self._output_files = []
         self._output_directory = None
         self._output_lock = asyncio.Lock()
-        self._read_lock = asyncio.Lock()
+        self._communication_lock = asyncio.Lock()
 
     def __del__(self):
         # Tidy up before quitting
@@ -290,14 +290,15 @@ class Submitter:
                 yield from self._wait_fut
             except asyncio.CancelledError:
                 logger.warning("Cancelled simulation")
-                yield from self._cancellation_lock
-                self._cancellation_lock.release()
             finally:
+                yield from self._communication_lock
+                self._communication_lock.release()
                 self._output_lock.release()
 
             self.send_command(writer, 'LOGS', None)
             success, message = yield from self.receive_response(reader)
-            logger.debug('<-- %s %s' % (str(success), str(message.replace('\\n', '\n'))))
+            for handle in message:
+                logger.debug('<-- %s %s %s' % (str(success), handle, str(message[handle].replace('\\n', '\n'))))
 
             if not success and not self._cancelled:
                 raise RuntimeError('Could not retrieve logs: %s', message)
@@ -355,6 +356,17 @@ class Submitter:
         return outcome
 
     @asyncio.coroutine
+    def logs(self, only=None):
+        """Retrieve logs from the simulation."""
+
+        with (yield from self._communication_lock):
+            self.send_command(self.writer, 'LOGS', {'only': only} if only else None)
+            success, message = yield from self.receive_response(self.reader)
+            logger.debug('<-- %s %s logs' % (str(success), str(only)))
+
+        return message
+
+    @asyncio.coroutine
     def cancel(self):
         """Break the output wait and instruct dockerlaunch to destroy simulation."""
 
@@ -362,8 +374,7 @@ class Submitter:
             return False
 
         self._cancelled = True
-        self._cancellation_lock = asyncio.Lock()
-        with (yield from self._cancellation_lock):
+        with (yield from self._communication_lock):
             self._wait_fut.cancel()
             yield from self.destroy(wait_for_response=True)
         return True

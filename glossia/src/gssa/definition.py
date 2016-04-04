@@ -331,8 +331,22 @@ class GoSmartSimulationDefinition:
         return uploaded_files
 
     @asyncio.coroutine
+    def logs(self, only=None):
+        """Send the cancel request to the model builder (family)."""
+
+        if not self._model_builder:
+            return False
+
+        logs = yield from self._model_builder.logs()
+        return logs
+
+    @asyncio.coroutine
     def cancel(self):
         """Send the cancel request to the model builder (family)."""
+
+        if not self._model_builder:
+            return False
+
         success = yield from self._model_builder.cancel()
         return success
 

@@ -120,6 +120,17 @@ class GoSmartSimulationServerSession(ApplicationSession):
         return self._component.doUpdateFiles(guid, files)
 
     @asyncio.coroutine
+    def doLogs(self, guid, only=None):
+        """``com.gosmartsimulation.logs``
+
+        :py:func:`gssa.server.GoSmartSimulationServerComponent.doLogs`
+
+        Retrieve the container logs for a simulation.
+
+        """
+        return self._component.doLogs(guid, only)
+
+    @asyncio.coroutine
     def doCancel(self, guid):
         """``com.gosmartsimulation.cancel``
 
@@ -266,6 +277,7 @@ class GoSmartSimulationServerSession(ApplicationSession):
                 self.register(self.doStart, u'com.gosmartsimulation%s.start' % i)
                 self.register(self.doUpdateSettingsXml, u'com.gosmartsimulation%s.update_settings_xml' % i)
                 self.register(self.doUpdateFiles, u'com.gosmartsimulation%s.update_files' % i)
+                self.register(self.doLogs, u'com.gosmartsimulation%s.logs' % i)
                 self.register(self.doCancel, u'com.gosmartsimulation%s.cancel' % i)
                 self.register(self.doRequestFiles, u'com.gosmartsimulation%s.request_files' % i)
                 self.register(self.doRequestDiagnostic, u'com.gosmartsimulation%s.request_diagnostic' % i)

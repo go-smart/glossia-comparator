@@ -355,6 +355,26 @@ class GoSmartSimulationServerComponent(object):
         return True
 
     @asyncio.coroutine
+    def doLogs(self, guid, only=None):
+        """``com.gosmartsimulation.logs``
+
+        Retrieve the container logs for a simulation.
+
+        """
+        guid, current = yield from self._fetch_definition(guid)
+        if not current:
+            logger.warning("Simulation [%s] not found" % guid)
+            return False
+
+        try:
+            result = yield from current.logs(only)
+        except Exception as e:
+            logger.exception("Problem retrieving simulation container logs")
+            raise e
+
+        return result
+
+    @asyncio.coroutine
     def doCancel(self, guid):
         """``com.gosmartsimulation.cancel``
 

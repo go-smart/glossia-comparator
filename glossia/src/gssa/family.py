@@ -169,6 +169,10 @@ class Family(metaclass=FamilyType):
         return None
 
     @asyncio.coroutine
+    def logs(self, only=None):
+        return {}
+
+    @asyncio.coroutine
     def cancel(self):
         return False
 
