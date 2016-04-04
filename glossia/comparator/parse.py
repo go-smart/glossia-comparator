@@ -23,7 +23,7 @@ import json
 # This turns GSSA-XML into a definition
 # TODO: use this implementation for the whole server
 # NB: it will need extended to include non-diff-relevant elements/fields
-def gssa_xml_to_definition(root, label="Simulation definition"):
+def gssa_xml_to_definition(root, label="Simulation definition", strict=False):
     # We must have a simulationDefinition root
     if root is None:
         raise RuntimeError("%s: No root tag" % label)
@@ -41,7 +41,7 @@ def gssa_xml_to_definition(root, label="Simulation definition"):
     elif len(transferrer) == 1:
         url = transferrer[0].find('url')
         cls = transferrer[0].get("class")
-        simulationDefinition.set_transferrer(cls, url.text)
+        simulationDefinition.set_transferrer(cls, url.text if url else None)
 
     # Start adding in algorithms
     algorithms = root.findall("algorithms")
@@ -148,11 +148,14 @@ def gssa_xml_to_definition(root, label="Simulation definition"):
                     regions.append(region_tuple)
 
             elif node.tag == 'definition':
-                if node.text is None:
+                if node.text is not None:
+                    definition = node.text.strip()
+                elif not strict:
+                    definition = ''
+                else:
                     raise RuntimeError("%s: Numerical model 'definition' tag exists but is empty [TODO: add support for external definitions]" % label)
                 # TODO: implement family comparison, as well as definition
                 # content
-                definition = node.text.strip()
                 family = node.get('family')
             else:
                 raise RuntimeError("%s: Unknown node in numerical model: %s" % (label, node.tag))

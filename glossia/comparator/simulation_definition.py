@@ -18,7 +18,7 @@
 
 from munkres import Munkres
 import difflib
-import glossia.comparator.parameters
+from . import parameters
 
 # CDM: Clinical Domain Model (see documentation)
 
@@ -287,7 +287,7 @@ class SimulationDefinition:
             messages = []
 
             if self.url != other.url:
-                messages += ["Transferrer: URLs differ - %s // %s" % (self.url, other.url)]
+                messages += ["Transferrer: URLs differ - %s // %s" % (str(self.url), str(other.url))]
             if self.cls != other.cls:
                 messages += ["Transferrer: classes differ - %s // %s" % (self.cls, other.cls)]
 
