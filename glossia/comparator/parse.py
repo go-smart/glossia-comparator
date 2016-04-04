@@ -23,7 +23,7 @@ import json
 # This turns GSSA-XML into a definition
 # TODO: use this implementation for the whole server
 # NB: it will need extended to include non-diff-relevant elements/fields
-def gssa_xml_to_definition(root, label):
+def gssa_xml_to_definition(root, label="Simulation definition"):
     # We must have a simulationDefinition root
     if root is None:
         raise RuntimeError("%s: No root tag" % label)
