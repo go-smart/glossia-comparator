@@ -184,11 +184,13 @@ class SimulationDefinition:
         definition, along with the regions, needles, parameters and so forth needed
         to complete it [see CDM]."""
         definition = ""
+        family = ''
         regions = None
         needles = None
 
-        def __init__(self, definition, regions, needles):
+        def __init__(self, definition, family, regions, needles):
             self.definition = definition
+            self.family = family
             self.regions = dict((r[0], SimulationDefinition.Region(*r)) for r in regions)
             self.needles = dict((n[0], SimulationDefinition.Needle(*n)) for n in needles)
 
@@ -311,8 +313,11 @@ class SimulationDefinition:
     def set_transferrer(self, cls, url):
         self.transferrer = self.Transferrer(cls, url)
 
-    def set_numerical_model(self, definition, regions, needles):
-        self.numerical_model = self.NumericalModel(definition, regions, needles)
+    def get_family(self):
+        return self.numerical_model.family
+
+    def set_numerical_model(self, definition, family, regions, needles):
+        self.numerical_model = self.NumericalModel(definition, family, regions, needles)
 
     def diff(self, other):
         """Produce a series of human-readable messages describing the

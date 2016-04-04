@@ -96,6 +96,7 @@ def gssa_xml_to_definition(root, label):
         needles = []
         regions = []
         definition = None
+        family = ''
 
         for node in numericalModel[0]:
             # The numerical model should contain the needles (in GSSA-XML, at
@@ -152,9 +153,10 @@ def gssa_xml_to_definition(root, label):
                 # TODO: implement family comparison, as well as definition
                 # content
                 definition = node.text.strip()
+                family = node.get('family')
             else:
                 raise RuntimeError("%s: Unknown node in numerical model: %s" % (label, node.tag))
 
-        simulationDefinition.set_numerical_model(definition, regions, needles)
+        simulationDefinition.set_numerical_model(definition, family, regions, needles)
 
     return simulationDefinition
