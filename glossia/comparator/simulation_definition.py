@@ -18,7 +18,7 @@
 
 from munkres import Munkres
 import difflib
-from .. import parameters
+import glossia.comparator.parameters
 
 # CDM: Clinical Domain Model (see documentation)
 
