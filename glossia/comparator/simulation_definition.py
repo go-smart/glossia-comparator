@@ -70,6 +70,12 @@ class SimulationDefinition:
             self.file = file
             self.parameters = dict((p[0], SimulationDefinition.Parameter(*p)) for p in parameters)
 
+        def get_parameter_value(self, key, try_json=True):
+            if key not in self.parameters:
+                return None
+
+            return self.parameters[key].value
+
         def diff(self, other):
             """Needles are defined by their class, ID/file and their parameters (inc.
             location) [see CDM]"""
@@ -193,6 +199,12 @@ class SimulationDefinition:
             self.family = family
             self.regions = dict((r[0], SimulationDefinition.Region(*r)) for r in regions)
             self.needles = dict((n[0], SimulationDefinition.Needle(*n)) for n in needles)
+
+        def get_regions(self):
+            return self.regions
+
+        def get_needles(self):
+            return self.needles
 
         def diff(self, other):
             messages = []
@@ -318,6 +330,21 @@ class SimulationDefinition:
 
     def set_numerical_model(self, definition, family, regions, needles):
         self.numerical_model = self.NumericalModel(definition, family, regions, needles)
+
+    def get_parameter_value(self, key, try_json=True):
+        if key not in self.parameters:
+            return None
+
+        return self.parameters[key].value
+
+    def get_needle_parameter_value(self, ix, key, try_json=True):
+        needles = self.numerical_model.get_needles()
+        needle_parameters = needles[ix].get_parameters()
+
+        return needle_parameters[key].value
+
+    def get_regions(self):
+        return self.numerical_model.get_regions()
 
     def diff(self, other):
         """Produce a series of human-readable messages describing the
