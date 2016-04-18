@@ -339,9 +339,7 @@ class SimulationDefinition:
 
     def get_needle_parameter_value(self, ix, key, try_json=True):
         needles = self.numerical_model.get_needles()
-        needle_parameters = needles[ix].get_parameters()
-
-        return needle_parameters[key].value
+        return needles[ix].get_parameter_value(key, try_json)
 
     def get_regions(self):
         return self.numerical_model.get_regions()
