@@ -41,7 +41,7 @@ def gssa_xml_to_definition(root, label="Simulation definition", strict=False):
     elif len(transferrer) == 1:
         url = transferrer[0].find('url')
         cls = transferrer[0].get("class")
-        simulationDefinition.set_transferrer(cls, url.text if url else None)
+        simulationDefinition.set_transferrer(cls, url.text if (url is not None) else None)
 
     # Start adding in algorithms
     algorithms = root.findall("algorithms")
