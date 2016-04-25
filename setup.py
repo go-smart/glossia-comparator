@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(name='glossia.comparator',
-      version='0.1.1',
-      packages=['glossia.comparator'],
+      version='0.1.2',
+      packages=['glossia', 'glossia.comparator'],
 
       description='Go-Smart Simulation Architecture XML interpretation',
       author='Phil Weir (NUMA Engineering Services Ltd.)',

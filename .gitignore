@@ -38,3 +38,4 @@ test-000000
 .cache
 build
 dist
+glossia.comparator.egg-info
