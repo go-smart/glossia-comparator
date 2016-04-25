@@ -214,12 +214,22 @@ class SimulationDefinition:
             self.regions = dict((r[0], SimulationDefinition.Region(*r)) for r in regions)
             self.needles = dict((n[0], SimulationDefinition.Needle(*n)) for n in needles)
 
+<<<<<<< HEAD
         def get_regions_dict(self):
             return {name: region.to_dict() for name, region in self.regions.items()}
 
         def get_needle_dicts(self):
             return [needle.to_dict() for needle in self.needles.values()]
 
+||||||| merged common ancestors
+=======
+        def get_regions(self):
+            return self.regions
+
+        def get_needles(self):
+            return self.needles
+
+>>>>>>> 3acfd563db84fabe76bb472589ec061c1ecb9d42
         def diff(self, other):
             messages = []
 
@@ -359,6 +369,19 @@ class SimulationDefinition:
 
     def set_numerical_model(self, definition, family, regions, needles):
         self.numerical_model = self.NumericalModel(definition, family, regions, needles)
+
+    def get_parameter_value(self, key, try_json=True):
+        if key not in self.parameters:
+            return None
+
+        return self.parameters[key].value
+
+    def get_needle_parameter_value(self, ix, key, try_json=True):
+        needles = self.numerical_model.get_needles()
+        return needles[ix].get_parameter_value(key, try_json)
+
+    def get_regions(self):
+        return self.numerical_model.get_regions()
 
     def diff(self, other):
         """Produce a series of human-readable messages describing the

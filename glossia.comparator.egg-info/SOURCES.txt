@@ -1,0 +1,14 @@
+README.rst
+setup.cfg
+setup.py
+glossia.comparator.egg-info/PKG-INFO
+glossia.comparator.egg-info/SOURCES.txt
+glossia.comparator.egg-info/dependency_links.txt
+glossia.comparator.egg-info/requires.txt
+glossia.comparator.egg-info/top_level.txt
+glossia/comparator/__init__.py
+glossia/comparator/comparator.py
+glossia/comparator/parameters.py
+glossia/comparator/parse.py
+glossia/comparator/simulation_definition.py
+scripts/go-smart-comparator
