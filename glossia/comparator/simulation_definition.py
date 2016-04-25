@@ -214,22 +214,12 @@ class SimulationDefinition:
             self.regions = dict((r[0], SimulationDefinition.Region(*r)) for r in regions)
             self.needles = dict((n[0], SimulationDefinition.Needle(*n)) for n in needles)
 
-<<<<<<< HEAD
         def get_regions_dict(self):
             return {name: region.to_dict() for name, region in self.regions.items()}
 
         def get_needle_dicts(self):
             return [needle.to_dict() for needle in self.needles.values()]
 
-||||||| merged common ancestors
-=======
-        def get_regions(self):
-            return self.regions
-
-        def get_needles(self):
-            return self.needles
-
->>>>>>> 3acfd563db84fabe76bb472589ec061c1ecb9d42
         def diff(self, other):
             messages = []
 

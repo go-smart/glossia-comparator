@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='glossia.comparator',
-      version='0.1',
+      version='0.1.1',
       packages=['glossia.comparator'],
 
       description='Go-Smart Simulation Architecture XML interpretation',
@@ -10,6 +10,7 @@ setup(name='glossia.comparator',
       url='http://gosmart-project.eu/',
 
       install_requires=[
+        'lxml',
         'munkres'
       ],
 
