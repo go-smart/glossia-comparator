@@ -18,6 +18,7 @@
 
 from munkres import Munkres
 import difflib
+import json
 from . import parameters
 
 # CDM: Clinical Domain Model (see documentation)
@@ -70,6 +71,17 @@ class SimulationDefinition:
             self.file = file
             self.parameters = dict((p[0], SimulationDefinition.Parameter(*p)) for p in parameters)
 
+        def to_dict(self):
+            return {
+                'index': self.index,
+                'class': self.cls,
+                'file': self.file,
+                'parameters': self.get_parameters_dict()
+            }
+
+        def get_parameters_dict(self):
+            return {name: param.to_tuple() for name, param in self.parameters.items()}
+
         def diff(self, other):
             """Needles are defined by their class, ID/file and their parameters (inc.
             location) [see CDM]"""
@@ -111,6 +123,14 @@ class SimulationDefinition:
             self.format = format
             self.input = input
             self.groups = groups
+
+        def to_dict(self):
+            return {
+                'format': self.format,
+                'groups': self.groups,
+                'input': self.input,
+                'meaning': self.name
+            }
 
         def diff(self, other):
             """A region's definition is, strictly, in the separate geometry file
@@ -194,6 +214,12 @@ class SimulationDefinition:
             self.regions = dict((r[0], SimulationDefinition.Region(*r)) for r in regions)
             self.needles = dict((n[0], SimulationDefinition.Needle(*n)) for n in needles)
 
+        def get_regions_dict(self):
+            return {name: region.to_dict() for name, region in self.regions.items()}
+
+        def get_needle_dicts(self):
+            return [needle.to_dict() for needle in self.needles.values()]
+
         def diff(self, other):
             messages = []
 
@@ -252,6 +278,12 @@ class SimulationDefinition:
             self.name = name
             self.typ = typ
             self.value = parameters.convert_parameter(value, typ)
+
+        def to_tuple(self):
+            return [
+                self.typ,
+                self.value
+            ]
 
         def diff(self, other):
             messages = []
@@ -312,6 +344,15 @@ class SimulationDefinition:
 
     def set_transferrer(self, cls, url):
         self.transferrer = self.Transferrer(cls, url)
+
+    def get_needle_dicts(self):
+        return self.numerical_model.get_needle_dicts()
+
+    def get_regions_dict(self):
+        return self.numerical_model.get_regions_dict()
+
+    def get_parameters_dict(self):
+        return {name: param.to_tuple() for name, param in self.parameters.items()}
 
     def get_family(self):
         return self.numerical_model.family
