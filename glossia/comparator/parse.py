@@ -108,10 +108,14 @@ def gssa_xml_to_definition(root, label="Simulation definition", strict=False):
                                            (label, needle.tag))
                     index = needle.get('index')
                     cls = needle.get('class')
+
                     file = needle.get('file')
+                    if not file:
+                        file = needle.get('input')
+
                     if None in (index, cls, file):
                         raise RuntimeError("%s: Needle tag has not got all information: Index '%s', Class '%s', File '%s'" %
-                                           label, index, cls, file)
+                                           (label, index, cls, file))
 
                     # Needles can each have their own parameters
                     parameters = []
