@@ -1,4 +1,4 @@
-from gssa.comparator import Comparator
+from glossia.comparator import Comparator
 from collections import Counter
 from lxml.etree import XMLSyntaxError
 import pytest
